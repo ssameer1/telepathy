@@ -1,56 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
-<ResourceDictionary 
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <toolkit:AppThemeColor x:Key="Primary"
-        Light="#F04B25"
-        Dark="#F04B25" />
-    
+                           Light="#F04B25"
+                           Dark="#F04B25"/>
+
     <toolkit:AppThemeColor x:Key="Secondary"
-        Light="#AC3420"
-        Dark="#EA482D" />
+                           Light="#AC3420"
+                           Dark="#EA482D"/>
 
     <toolkit:AppThemeColor x:Key="Tertiary"
-        Light="#4BA0BF"
-        Dark="#4BA0BF" />
+                           Light="#4BA0BF"
+                           Dark="#4BA0BF"/>
 
     <toolkit:AppThemeColor x:Key="Quaternary"
-        Light="#FFC728"
-        Dark="#FFC728" />
+                           Light="#FFC728"
+                           Dark="#FFC728"/>
 
     <toolkit:AppThemeColor x:Key="Background"
-        Light="#F5F5F5"
-        Dark="#121212" />
+                           Light="#F5F5F5"
+                           Dark="#121212"/>
 
     <toolkit:AppThemeColor x:Key="OnBackground"
-        Light="#000000"
-        Dark="#FFFFFF" />
+                           Light="#000000"
+                           Dark="#FFFFFF"/>
 
     <toolkit:AppThemeColor x:Key="OnPrimary"
-        Light="#F5F5F5"
-        Dark="#F5F5F5" />
+                           Light="#F5F5F5"
+                           Dark="#F5F5F5"/>
 
     <toolkit:AppThemeColor x:Key="Surface0"
-        Light="#FFFFFF"
-        Dark="#1E1E1E" />
+                           Light="#FFFFFF"
+                           Dark="#1E1E1E"/>
 
     <toolkit:AppThemeColor x:Key="Surface1"
-        Light="#DBDBDB"
-        Dark="#2B2B2B" />
+                           Light="#DBDBDB"
+                           Dark="#2B2B2B"/>
 
     <toolkit:AppThemeColor x:Key="Surface2"
-        Light="#CECECE"
-        Dark="#383838" />
+                           Light="#CECECE"
+                           Dark="#383838"/>
 
     <toolkit:AppThemeColor x:Key="Surface3"
-        Light="#C2C2C2"
-        Dark="#454545" />
+                           Light="#C2C2C2"
+                           Dark="#454545"/>
 
     <Color x:Key="White">#FFFFFF</Color>
-    <Color x:Key="Black">#000000</Color>    
+    <Color x:Key="Black">#000000</Color>
 
     <!-- Grayscale -->
     <Color x:Key="Gray100">#E1E1E1</Color>
@@ -63,18 +63,23 @@
     <Color x:Key="Gray950">#141414</Color>
 
     <toolkit:AppThemeColor x:Key="PlaceholderColor"
-        Light="{StaticResource Gray200}"
-        Dark="{StaticResource Gray500}" />
+                           Light="{StaticResource Gray200}"
+                           Dark="{StaticResource Gray500}"/>
 
     <toolkit:AppThemeColor x:Key="DisabledColor"
-        Light="{StaticResource Gray300}"
-        Dark="{StaticResource Gray600}" />
+                           Light="{StaticResource Gray300}"
+                           Dark="{StaticResource Gray600}"/>
 
 
-    <LinearGradientBrush x:Key="AIBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{toolkit:AppThemeResource Primary}" Offset="0.0" />
-        <GradientStop Color="{toolkit:AppThemeResource Tertiary}" Offset="0.5" />
-        <GradientStop Color="{toolkit:AppThemeResource Quaternary}" Offset="1.0" />
+    <LinearGradientBrush x:Key="AIBrush"
+                         StartPoint="0,0"
+                         EndPoint="1,1">
+        <GradientStop Color="#F04B25"
+                      Offset="0.0"/>
+        <GradientStop Color="#4BA0BF"
+                      Offset="0.5"/>
+        <GradientStop Color="#FFC728"
+                      Offset="1.0"/>
     </LinearGradientBrush>
 
 </ResourceDictionary>

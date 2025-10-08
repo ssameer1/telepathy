@@ -7,61 +7,67 @@
              xmlns:sf="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
              xmlns:controls="clr-namespace:Telepathic.Pages.Controls"
              xmlns:fonts="clr-namespace:Fonts"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"             
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:aloha="clr-namespace:AlohaKit.Animations;assembly=AlohaKit.Animations"
              xmlns:converters="clr-namespace:Telepathic.Converters"
              x:Class="Telepathic.Pages.ProjectDetailPage"
              x:DataType="pageModels:ProjectDetailPageModel"
+             SafeAreaEdges="None"
              Title="Project">
 
     <ContentPage.Resources>
-        <DataTemplate x:Key="NormalTagTemplate" x:DataType="models:Tag">
-                <Border StrokeShape="RoundRectangle 22" 
-                        HeightRequest="44" 
-                        StrokeThickness="0"
-                        BackgroundColor="{toolkit:AppThemeResource Surface1}" 
-                        Padding="{OnPlatform '18,0,18,8',Android='18,0,18,0'}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleTagCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectDetailPageModel}}, x:DataType=pageModels:ProjectDetailPageModel}" CommandParameter="{Binding .}"/>
-                        </Border.GestureRecognizers>
-                        <Label Text="{Binding Title}"
-                            TextColor="{toolkit:AppThemeResource OnBackground}"
-                            FontSize="{OnIdiom 16,Desktop=18}" 
-                            VerticalOptions="Center"
-                            VerticalTextAlignment="Center"/>
-                </Border>
-        </DataTemplate>
-
-        <DataTemplate x:Key="SelectedTagTemplate" x:DataType="models:Tag">
-            <Border StrokeShape="RoundRectangle 22" 
-                        HeightRequest="44" 
-                        StrokeThickness="0"
-                        Background="{Binding DisplayColor}" 
-                        Padding="{OnPlatform '18,0,18,8',Android='18,0,18,0'}">
+        <DataTemplate x:Key="NormalTagTemplate"
+                      x:DataType="models:Tag">
+            <Border StrokeShape="RoundRectangle 22"
+                    HeightRequest="44"
+                    StrokeThickness="0"
+                    BackgroundColor="{toolkit:AppThemeResource Surface1}"
+                    Padding="{OnPlatform '18,0,18,8',Android='18,0,18,0'}">
                 <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding ToggleTagCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectDetailPageModel}}, x:DataType=pageModels:ProjectDetailPageModel}" CommandParameter="{Binding .}"/>
+                    <TapGestureRecognizer Command="{Binding ToggleTagCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectDetailPageModel}}, x:DataType=pageModels:ProjectDetailPageModel}"
+                                          CommandParameter="{Binding .}"/>
                 </Border.GestureRecognizers>
                 <Label Text="{Binding Title}"
-                    TextColor="{toolkit:AppThemeResource Background}" 
-                    FontSize="{OnIdiom 16,Desktop=18}" 
-                    VerticalOptions="Center"
-                    VerticalTextAlignment="Center"/>
+                       TextColor="{toolkit:AppThemeResource OnBackground}"
+                       FontSize="{OnIdiom 16,Desktop=18}"
+                       VerticalOptions="Center"
+                       VerticalTextAlignment="Center"/>
             </Border>
         </DataTemplate>
 
-        <pages:ChipDataTemplateSelector 
+        <DataTemplate x:Key="SelectedTagTemplate"
+                      x:DataType="models:Tag">
+            <Border StrokeShape="RoundRectangle 22"
+                    HeightRequest="44"
+                    StrokeThickness="0"
+                    Background="{Binding DisplayColor}"
+                    Padding="{OnPlatform '18,0,18,8',Android='18,0,18,0'}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleTagCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectDetailPageModel}}, x:DataType=pageModels:ProjectDetailPageModel}"
+                                          CommandParameter="{Binding .}"/>
+                </Border.GestureRecognizers>
+                <Label Text="{Binding Title}"
+                       TextColor="{toolkit:AppThemeResource Background}"
+                       FontSize="{OnIdiom 16,Desktop=18}"
+                       VerticalOptions="Center"
+                       VerticalTextAlignment="Center"/>
+            </Border>
+        </DataTemplate>
+
+        <pages:ChipDataTemplateSelector
             x:Key="ChipDataTemplateSelector"
             NormalTagTemplate="{StaticResource NormalTagTemplate}"
-            SelectedTagTemplate="{StaticResource SelectedTagTemplate}"/>        <toolkit:BoolToObjectConverter x:Key="IsTelepathyEnabledConverter" 
-                                          TrueObject="{StaticResource AIBrush}" 
-                                          FalseObject="{StaticResource White}" />
-                                          
+            SelectedTagTemplate="{StaticResource SelectedTagTemplate}"/>
+        <toolkit:BoolToObjectConverter x:Key="IsTelepathyEnabledConverter"
+                                       TrueObject="{StaticResource AIBrush}"
+                                       FalseObject="{StaticResource White}"/>
+
         <converters:BothBooleanConverter x:Key="BothTrueConverter"
                                          TrueObject="{StaticResource AIBrush}"
-                                         FalseObject="{x:Null}" />
-                                        
-        <toolkit:MathExpressionConverter x:Key="MathExpressionConverter" />
-        <toolkit:MultiMathExpressionConverter x:Key="MultiMathExpressionConverter" />
+                                         FalseObject="{x:Null}"/>
+
+        <toolkit:MathExpressionConverter x:Key="MathExpressionConverter"/>
+        <toolkit:MultiMathExpressionConverter x:Key="MultiMathExpressionConverter"/>
     </ContentPage.Resources>
 
     <ContentPage.ToolbarItems>
@@ -70,135 +76,150 @@
             Command="{Binding DeleteCommand}"
             Order="Primary"
             Priority="0"
-            IconImageSource="{StaticResource IconDelete}" />
+            IconImageSource="{StaticResource IconDelete}"/>
     </ContentPage.ToolbarItems>
 
-    <Grid>
+    <Grid SafeAreaEdges="None">
         <ScrollView x:Name="ScrollView">
             <ScrollView.Behaviors>
-                <aloha:ScrollViewScrollBehavior x:Name="ScrollBehavior" />
+                <aloha:ScrollViewScrollBehavior x:Name="ScrollBehavior"/>
             </ScrollView.Behaviors>
-            <VerticalStackLayout x:Name="ScrollContent" Padding="{StaticResource LayoutPadding}" Spacing="{StaticResource LayoutSpacing}">
-                <controls:GradientTextInputLayout 
+            <VerticalStackLayout x:Name="ScrollContent"
+                                 Padding="{StaticResource LayoutPadding}"
+                                 Spacing="{StaticResource LayoutSpacing}">
+                <controls:GradientTextInputLayout
                     ContainerType="Outlined"
-                    Hint="Name" >                    
+                    Hint="Name">
                     <controls:GradientTextInputLayout.StrokeBrush>
                         <MultiBinding Converter="{StaticResource BothTrueConverter}">
-                            <Binding Path="IsTelepathyEnabled" />
-                            <Binding Path="IsNewProject" />
+                            <Binding Path="IsTelepathyEnabled"/>
+                            <Binding Path="IsNewProject"/>
                         </MultiBinding>
                     </controls:GradientTextInputLayout.StrokeBrush>
-                    <Entry 
+                    <Entry
                         Text="{Binding Name}">
                         <Entry.Behaviors>
-                            <toolkit:EventToCommandBehavior EventName="Unfocused" Command="{Binding NameUnfocusedCommand}"/>
+                            <toolkit:EventToCommandBehavior EventName="Unfocused"
+                                                            Command="{Binding NameUnfocusedCommand}"/>
                         </Entry.Behaviors>
                     </Entry>
                 </controls:GradientTextInputLayout>
 
-                <sf:SfTextInputLayout 
+                <sf:SfTextInputLayout
                     Hint="Description">
                     <Entry
-                        Text="{Binding Description}" />
+                        Text="{Binding Description}"/>
                 </sf:SfTextInputLayout>
 
-                <sf:SfTextInputLayout 
+                <sf:SfTextInputLayout
                     Hint="Category">
-                    <Picker 
+                    <Picker
                         ItemsSource="{Binding Categories}"
                         SelectedItem="{Binding Category}"
-                        SelectedIndex="{Binding CategoryIndex}" />
-                </sf:SfTextInputLayout>                
-                
-                <controls:ActivityIndicatorView 
-                            IsVisible="{Binding IsBusy}"
-                            IsRunning="{Binding IsBusy}"
-                            HorizontalOptions="Fill"
-                            Title="{Binding BusyTitle}" 
-                            Detail="{Binding BusyDetails}"
-                            MinimumHeightRequest="100"                                 
-                            TitleTextColor="#4d999999"
-                            DetailTextColor="{toolkit:AppThemeResource PlaceholderColor}"
-                             />
-                
-                <!-- "Accept All" recommendation button - only shown when recommendations exist -->
-                <Button 
-                    Text="Accept All Recommendations" 
-                    Command="{Binding AcceptAllRecommendationsCommand}" 
-                    IsVisible="{Binding HasRecommendedTasks}"
-                    HorizontalOptions="Start" />
-                             
+                        SelectedIndex="{Binding CategoryIndex}"/>
+                </sf:SfTextInputLayout>
 
-                <Label 
-                    Text="Icon" 
+                <controls:ActivityIndicatorView
+                    IsVisible="{Binding IsBusy}"
+                    IsRunning="{Binding IsBusy}"
+                    HorizontalOptions="Fill"
+                    Title="{Binding BusyTitle}"
+                    Detail="{Binding BusyDetails}"
+                    MinimumHeightRequest="100"
+                    TitleTextColor="#4d999999"
+                    DetailTextColor="{toolkit:AppThemeResource PlaceholderColor}"/>
+
+                <!-- "Accept All" recommendation button - only shown when recommendations exist -->
+                <Button
+                    Text="Accept All Recommendations"
+                    Command="{Binding AcceptAllRecommendationsCommand}"
+                    IsVisible="{Binding HasRecommendedTasks}"
+                    HorizontalOptions="Start"/>
+
+
+                <Label
+                    Text="Icon"
                     Style="{StaticResource Title2}"/>
-                <CollectionView 
-                    HeightRequest="44" Margin="0,0,0,15"
+                <CollectionView
+                    HeightRequest="44"
+                    Margin="0,0,0,15"
                     SelectionMode="Single"
-                    
                     SelectedItem="{Binding Icon}"
                     ItemsSource="{Binding Icons}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="x:String">
-                            <Grid RowDefinitions="Auto,4" RowSpacing="{StaticResource size60}">
+                            <Grid RowDefinitions="Auto,4"
+                                  RowSpacing="{StaticResource size60}">
                                 <VisualStateManager.VisualStateGroups>
                                     <VisualStateGroup x:Name="CommonStates">
                                         <VisualState x:Name="Normal">
                                             <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="Transparent"/>
-                                                <Setter TargetName="SelectedIndicator" Property="BoxView.IsVisible" Value="False"/>
+                                                <Setter Property="BackgroundColor"
+                                                        Value="Transparent"/>
+                                                <Setter TargetName="SelectedIndicator"
+                                                        Property="BoxView.IsVisible"
+                                                        Value="False"/>
                                             </VisualState.Setters>
                                         </VisualState>
                                         <VisualState x:Name="Selected">
                                             <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="Transparent"/>
-                                                <Setter Property="Background" Value="Transparent"/>
-                                                <Setter TargetName="SelectedIndicator" Property="BoxView.IsVisible" Value="True"/>
+                                                <Setter Property="BackgroundColor"
+                                                        Value="Transparent"/>
+                                                <Setter Property="Background"
+                                                        Value="Transparent"/>
+                                                <Setter TargetName="SelectedIndicator"
+                                                        Property="BoxView.IsVisible"
+                                                        Value="True"/>
                                             </VisualState.Setters>
                                         </VisualState>
                                     </VisualStateGroup>
                                 </VisualStateManager.VisualStateGroups>
-                                
-                                <Label 
-                                    Text="{Binding .}" 
+
+                                <Label
+                                    Text="{Binding .}"
                                     x:Name="IconImage"
-                                    FontFamily="{x:Static fonts:FluentUI.FontFamily}" 
-                                    FontSize="24" 
+                                    FontFamily="{x:Static fonts:FluentUI.FontFamily}"
+                                    FontSize="24"
                                     VerticalOptions="Center"
                                     HorizontalOptions="Center"
                                     TextColor="{toolkit:AppThemeResource OnBackground}"/>
-                                <BoxView x:Name="SelectedIndicator" Color="{StaticResource Primary}" HeightRequest="4" HorizontalOptions="Fill" Grid.Row="1"/>
-                            </Grid>                            
+                                <BoxView x:Name="SelectedIndicator"
+                                         Color="{toolkit:AppThemeResource Primary}"
+                                         HeightRequest="4"
+                                         HorizontalOptions="Fill"
+                                         Grid.Row="1"/>
+                            </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                     <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="{StaticResource LayoutSpacing}"/>
+                        <LinearItemsLayout Orientation="Horizontal"
+                                           ItemSpacing="{StaticResource LayoutSpacing}"/>
                     </CollectionView.ItemsLayout>
                 </CollectionView>
-                
 
-                <Label 
-                    Text="Tags" 
+
+                <Label
+                    Text="Tags"
                     Style="{StaticResource Title2}"/>
                 <ScrollView Orientation="Horizontal">
-                    <HorizontalStackLayout 
-                        Spacing="{StaticResource LayoutSpacing}" 
-                        HeightRequest="44" 
+                    <HorizontalStackLayout
+                        Spacing="{StaticResource LayoutSpacing}"
+                        HeightRequest="44"
                         Margin="0,0,0,15"
-                        BindableLayout.ItemsSource="{Binding AllTags}" 
+                        BindableLayout.ItemsSource="{Binding AllTags}"
                         BindableLayout.ItemTemplateSelector="{StaticResource ChipDataTemplateSelector}"/>
                 </ScrollView>
 
-                <Button Text="Save" 
-                    HeightRequest="{OnIdiom 44, Desktop=60}"
-                    Command="{Binding SaveCommand}" />
+                <Button Text="Save"
+                        HeightRequest="{OnIdiom 44, Desktop=60}"
+                        Command="{Binding SaveCommand}"/>
 
                 <Grid HeightRequest="44">
-                    <Label 
-                        Text="Tasks" 
-                        Style="{StaticResource Title2}" 
+                    <Label
+                        Text="Tasks"
+                        Style="{StaticResource Title2}"
                         VerticalOptions="Center"/>
-                    <ImageButton 
+                    <ImageButton
                         Source="{StaticResource IconClean}"
                         HorizontalOptions="End"
                         VerticalOptions="Center"
@@ -206,49 +227,36 @@
                         HeightRequest="44"
                         WidthRequest="44"
                         IsVisible="{Binding HasCompletedTasks}"
-                        Command="{Binding CleanTasksCommand}"
-                        />
-                </Grid>                
-                <VerticalStackLayout 
+                        Command="{Binding CleanTasksCommand}"/>
+                </Grid>
+                <VerticalStackLayout
                     Spacing="{StaticResource LayoutSpacing}">
                     <!-- Combined list of regular tasks -->
                     <BindableLayout.ItemsSource>
                         <MultiBinding Converter="{StaticResource CombinedTasksConverter}">
-                            <Binding Path="Tasks" />
-                            <Binding Path="RecommendedTasks" />
+                            <Binding Path="Tasks"/>
+                            <Binding Path="RecommendedTasks"/>
                         </MultiBinding>
                     </BindableLayout.ItemsSource>
-                    <BindableLayout.ItemTemplate>                        
+                    <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <controls:TaskView 
-                                TaskCompletedCommand="{Binding TaskCompletedCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectDetailPageModel}}, x:DataType=pageModels:ProjectDetailPageModel}" 
+                            <controls:TaskView
+                                TaskCompletedCommand="{Binding TaskCompletedCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectDetailPageModel}}, x:DataType=pageModels:ProjectDetailPageModel}"
                                 AcceptRecommendationCommand="{Binding AcceptRecommendationCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectDetailPageModel}}, x:DataType=pageModels:ProjectDetailPageModel}"
-                                RejectRecommendationCommand="{Binding RejectRecommendationCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectDetailPageModel}}, x:DataType=pageModels:ProjectDetailPageModel}" />
+                                RejectRecommendationCommand="{Binding RejectRecommendationCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectDetailPageModel}}, x:DataType=pageModels:ProjectDetailPageModel}"/>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
 
-        <controls:AddButton Command="{Binding AddTaskCommand}" Opacity="1">
-            <!-- <VisualElement.Behaviors>
-                <aloha:AnimateProgressDouble
-                    x:Name="AddButtonAnimation"
-                    TargetProperty="VisualElement.Opacity"
-                    Progress="{Binding ScrollY, Source={x:Reference ScrollBehavior}, x:DataType=aloha:ScrollViewScrollBehavior}" 
-                    Minimum="{Binding Maximum, Source={x:Reference AddButtonAnimation}, x:DataType=aloha:AnimateProgressDouble,Converter={StaticResource MathExpressionConverter}, ConverterParameter='x-100', Mode=OneWay}"                        
-                    From="1"
-                    To="0">                        
-                    <aloha:AnimateProgressDouble.Maximum>
-                        <MultiBinding Converter="{StaticResource MultiMathExpressionConverter}"
-                            ConverterParameter="x1-x0">
-                            <Binding Path="HeightRequest" Source="{x:Reference ScrollView}" x:DataType="ScrollView" />
-                            <Binding Path="HeightRequest" Source="{x:Reference ScrollContent}" x:DataType="VerticalStackLayout" />
-                        </MultiBinding>
-                    </aloha:AnimateProgressDouble.Maximum>
-                </aloha:AnimateProgressDouble>
-            </VisualElement.Behaviors> -->
-        </controls:AddButton>
+        <ContentView SafeAreaEdges="None"
+                     VerticalOptions="End"
+                     HorizontalOptions="End">
+
+            <controls:AddButton Command="{Binding AddTaskCommand}"
+                                Opacity="1"/>
+        </ContentView>
     </Grid>
-    
+
 </ContentPage>

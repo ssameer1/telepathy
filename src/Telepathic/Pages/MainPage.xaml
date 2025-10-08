@@ -16,24 +16,31 @@
              xmlns:effectsView="http://schemas.syncfusion.com/maui/toolkit"
              x:Class="Telepathic.Pages.MainPage"
              x:DataType="pageModels:MainPageModel"
+             x:Name="OverviewPage"
+             SafeAreaEdges="None"
              Title="{Binding Today}">
 
     <ContentPage.Behaviors>
         <toolkit:EventToCommandBehavior
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference OverviewPage}, x:DataType=ContentPage}"
             EventName="NavigatedTo"
             Command="{Binding NavigatedToCommand}"/>
         <toolkit:EventToCommandBehavior
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference OverviewPage}, x:DataType=ContentPage}"
             EventName="NavigatedFrom"
             Command="{Binding NavigatedFromCommand}"/>
         <toolkit:EventToCommandBehavior
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference OverviewPage}, x:DataType=ContentPage}"
             EventName="Appearing"
             Command="{Binding AppearingCommand}"/>
         <!-- <toolkit:StatusBarBehavior StatusBarColor="{toolkit:AppThemeResource Background}"/> -->
     </ContentPage.Behaviors>
 
     <ContentPage.Resources>
-        <ResourceDictionary>            
-            <toolkit:AppThemeObject x:Key="TelepathyIcon" Light="icon_telepathy_light_off.png" Dark="icon_telepathy_dark_off.png"/>
+        <ResourceDictionary>
+            <toolkit:AppThemeObject x:Key="TelepathyIcon"
+                                    Light="icon_telepathy_light_off.png"
+                                    Dark="icon_telepathy_dark_off.png"/>
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
             <toolkit:MathExpressionConverter x:Key="MathExpressionConverter"/>
             <toolkit:MultiMathExpressionConverter x:Key="MultiMathExpressionConverter"/>
@@ -44,7 +51,7 @@
     <Shell.TitleView>
         <Grid>
             <ImageButton Source="{toolkit:AppThemeResource TelepathyIcon}"
-                        IsVisible="{Binding IsTelepathyEnabled,Converter={StaticResource InvertedBoolConverter}}"
+                         IsVisible="{Binding IsTelepathyEnabled,Converter={StaticResource InvertedBoolConverter}}"
                          HorizontalOptions="End"
                          VerticalOptions="Center"
                          Aspect="AspectFit"
@@ -64,7 +71,7 @@
         </Grid>
     </Shell.TitleView>
 
-    <Grid>
+    <Grid SafeAreaEdges="None">
         <pullToRefresh:SfPullToRefresh
             IsRefreshing="{Binding IsRefreshing}"
             RefreshCommand="{Binding RefreshCommand}">
@@ -90,94 +97,97 @@
                             MinimumWidthRequest="200"
                             MinimumHeightRequest="100"
                             ShimmerStartColor="#4a90e2"
-                            ShimmerEndColor="#9b59b6"/>                     <!-- Priority Tasks Section -->
-                        <VerticalStackLayout 
+                            ShimmerEndColor="#9b59b6"/>
+                        <!-- Priority Tasks Section -->
+                        <VerticalStackLayout
                             IsVisible="{Binding ShouldShowPriorityTasks}"
                             Spacing="{StaticResource LayoutSpacing}"
-                            Margin="0,0,0,12">                            
+                            Margin="0,0,0,12">
                             <Label Text="{Binding PersonalizedGreeting}"
                                    Style="{StaticResource Title2}"
-                                   TextColor="{toolkit:AppThemeResource Tertiary}"/>    
-                            <cards:SfCardLayout 
+                                   TextColor="{toolkit:AppThemeResource Tertiary}"/>
+                            <cards:SfCardLayout
                                 BindableLayout.ItemsSource="{Binding PriorityTasks}"
                                 VerticalOptions="Center"
-                                SwipeDirection="Left"      
-                                HeightRequest="200"  
+                                SwipeDirection="Left"
+                                HeightRequest="200"
                                 BackgroundColor="Transparent">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate>
-                                            <cards:SfCardView 
-                                                x:DataType="viewModels:ProjectTaskViewModel"
-                                                BackgroundColor="Transparent" 
-                                                BorderWidth="0" 
-                                                FadeOutOnSwiping="True">                                                      
-                                                <Border
-                                                        StrokeThickness="1"
-                                                        Stroke="{toolkit:AppThemeResource Surface1}"
-                                                        StrokeShape="RoundRectangle 20"
-                                                        BackgroundColor="{toolkit:AppThemeResource Surface0}"
-                                                        InputTransparent="False"
-                                                        >
-                                                    <Border.GestureRecognizers>
-                                                        <TapGestureRecognizer 
-                                                            Command="{Binding NavigateToTaskCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}},x:DataType=pageModels:MainPageModel}"
-                                                                CommandParameter="{Binding Task}"/>
-                                                    </Border.GestureRecognizers>
-                                                    <!-- <effectsView:SfEffectsView
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <cards:SfCardView
+                                            x:DataType="viewModels:ProjectTaskViewModel"
+                                            BackgroundColor="Transparent"
+                                            BorderWidth="0"
+                                            FadeOutOnSwiping="True">
+                                            <Border
+                                                StrokeThickness="1"
+                                                Stroke="{toolkit:AppThemeResource Surface1}"
+                                                StrokeShape="RoundRectangle 20"
+                                                BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                                                InputTransparent="False">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding NavigateToTaskCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}},x:DataType=pageModels:MainPageModel}"
+                                                        CommandParameter="{Binding Task}"/>
+                                                </Border.GestureRecognizers>
+                                                <!-- <effectsView:SfEffectsView
                                                         TouchDownEffects="Highlight"
                                                         HighlightBackground="{toolkit:AppThemeResource OnBackground}"> -->
-                                                        <Grid RowDefinitions="*"
-                                                            ColumnDefinitions="*" IsClippedToBounds="True">
-                                                            <!-- Checkbox in the upper left -->
-                                                            <Grid ColumnSpacing="15"
-                                                                ColumnDefinitions="Auto, *"
-                                                                VerticalOptions="Start" HorizontalOptions="Start"
-                                                                IsVisible="{Binding IsShowingReasoning,Converter={StaticResource InvertedBoolConverter}}">
-                                                                <CheckBox 
-                                                                    Grid.Row="0"
-                                                                    Grid.Column="0"
-                                                                    VerticalOptions="Center"
-                                                                    IsChecked="{Binding IsCompleted}" 
-                                                                    Color="{toolkit:AppThemeResource Primary}"
-                                                                    CheckedChanged="PriorityTask_CheckedChanged"/>
-                                                                <Label Text="{Binding Title}"
-                                                                    VerticalOptions="Center"
-                                                                    LineBreakMode="WordWrap"
-                                                                    MaxLines="3"
-                                                                    HorizontalOptions="Start"
-                                                                    Grid.Column="1"
-                                                                    TextColor="{toolkit:AppThemeResource OnBackground}"/>
-                                                            </Grid>
-                                                            
-                                                            <!-- Priority Reasoning (replaces title when visible) -->
-                                                            <Label Text="{Binding PriorityReasoning}"
-                                                                    Style="{StaticResource Body1}"
-                                                                    FontAttributes="Italic"
-                                                                    LineBreakMode="WordWrap"
-                                                                    VerticalOptions="Start"
-                                                                    IsVisible="{Binding IsShowingReasoning}"
-                                                                    TextColor="{toolkit:AppThemeResource OnBackground}"/>
-                                                            
-                                                            <HorizontalStackLayout Spacing="{StaticResource size160}"
-                                                                HorizontalOptions="End"
-                                                                VerticalOptions="End" IsClippedToBounds="True">
-                                                                <ImageButton Source="{StaticResource IconInsights}"                                                                        
-                                                                        Aspect="Center"
-                                                                        HeightRequest="44"
-                                                                        WidthRequest="44"
-                                                                        BackgroundColor="Transparent"
-                                                                        Command="{Binding ToggleShowReasoningCommand}"/>
+                                                <Grid RowDefinitions="*"
+                                                      ColumnDefinitions="*"
+                                                      IsClippedToBounds="True">
+                                                    <!-- Checkbox in the upper left -->
+                                                    <Grid ColumnSpacing="15"
+                                                          ColumnDefinitions="Auto, *"
+                                                          VerticalOptions="Start"
+                                                          HorizontalOptions="Start"
+                                                          IsVisible="{Binding IsShowingReasoning,Converter={StaticResource InvertedBoolConverter}}">
+                                                        <CheckBox
+                                                            Grid.Row="0"
+                                                            Grid.Column="0"
+                                                            VerticalOptions="Center"
+                                                            IsChecked="{Binding IsCompleted}"
+                                                            Color="{toolkit:AppThemeResource Primary}"
+                                                            CheckedChanged="PriorityTask_CheckedChanged"/>
+                                                        <Label Text="{Binding Title}"
+                                                               VerticalOptions="Center"
+                                                               LineBreakMode="WordWrap"
+                                                               MaxLines="3"
+                                                               HorizontalOptions="Start"
+                                                               Grid.Column="1"
+                                                               TextColor="{toolkit:AppThemeResource OnBackground}"/>
+                                                    </Grid>
 
-                                                                <ImageButton Source="{StaticResource IconAssist}"
-                                                                        IsVisible="{Binding Task.AssistType, Converter={StaticResource AssistTypeToBoolConverter}}"
-                                                                        Aspect="Center"
-                                                                        HeightRequest="44"
-                                                                        WidthRequest="44"
-                                                                        BackgroundColor="Transparent"
-                                                                        Command="{Binding AssistCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"
-                                                                        CommandParameter="{Binding Task}"/>
+                                                    <!-- Priority Reasoning (replaces title when visible) -->
+                                                    <Label Text="{Binding PriorityReasoning}"
+                                                           Style="{StaticResource Body1}"
+                                                           FontAttributes="Italic"
+                                                           LineBreakMode="WordWrap"
+                                                           VerticalOptions="Start"
+                                                           IsVisible="{Binding IsShowingReasoning}"
+                                                           TextColor="{toolkit:AppThemeResource OnBackground}"/>
 
-                                                                <!-- <ImageButton Source="{StaticResource IconAssist}"
+                                                    <HorizontalStackLayout Spacing="{StaticResource size160}"
+                                                                           HorizontalOptions="End"
+                                                                           VerticalOptions="End"
+                                                                           IsClippedToBounds="True">
+                                                        <ImageButton Source="{StaticResource IconInsights}"
+                                                                     Aspect="Center"
+                                                                     HeightRequest="44"
+                                                                     WidthRequest="44"
+                                                                     BackgroundColor="Transparent"
+                                                                     Command="{Binding ToggleShowReasoningCommand}"/>
+
+                                                        <ImageButton Source="{StaticResource IconAssist}"
+                                                                     IsVisible="{Binding Task.AssistType, Converter={StaticResource AssistTypeToBoolConverter}}"
+                                                                     Aspect="Center"
+                                                                     HeightRequest="44"
+                                                                     WidthRequest="44"
+                                                                     BackgroundColor="Transparent"
+                                                                     Command="{Binding AssistCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"
+                                                                     CommandParameter="{Binding Task}"/>
+
+                                                        <!-- <ImageButton Source="{StaticResource IconAssist}"
                                                                         IsVisible="{Binding AssistType, Converter={StaticResource AssistTypeToBoolConverter}}"
                                                                         Aspect="Center"
                                                                         HeightRequest="44"
@@ -185,44 +195,44 @@
                                                                         BackgroundColor="Transparent"
                                                                         Command="{Binding CheckIsNearbyCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"
                                                                         CommandParameter="{Binding .}"/> -->
-                                                            </HorizontalStackLayout>
-                                                            
-                                                            
-                                                            <!-- Project Name in the lower left -->
-                                                            <Label 
-                                                                Text="{Binding ProjectName, FallbackValue='Project'}"
-                                                                Style="{StaticResource Body2}"
-                                                                LineBreakMode="TailTruncation"
-                                                                MaximumWidthRequest="{OnIdiom Phone=180, Tablet=400}"
-                                                                HorizontalOptions="Start"
-                                                                VerticalOptions="End"                                                                
-                                                                TextColor="{toolkit:AppThemeResource Tertiary}"/>
-                                                        </Grid>
-                                                    <!-- </effectsView:SfEffectsView> -->
-                                                </Border>                                                
-                                            </cards:SfCardView>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
+                                                    </HorizontalStackLayout>
+
+
+                                                    <!-- Project Name in the lower left -->
+                                                    <Label
+                                                        Text="{Binding ProjectName, FallbackValue='Project'}"
+                                                        Style="{StaticResource Body2}"
+                                                        LineBreakMode="TailTruncation"
+                                                        MaximumWidthRequest="{OnIdiom Phone=180, Tablet=400}"
+                                                        HorizontalOptions="Start"
+                                                        VerticalOptions="End"
+                                                        TextColor="{toolkit:AppThemeResource Tertiary}"/>
+                                                </Grid>
+                                                <!-- </effectsView:SfEffectsView> -->
+                                            </Border>
+                                        </cards:SfCardView>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
                             </cards:SfCardLayout>
                         </VerticalStackLayout>
 
-                        <controls:CategoryChart />
+                        <controls:CategoryChart/>
 
                         <Label Text="Projects"
-                                Style="{StaticResource Title2}"/>
+                               Style="{StaticResource Title2}"/>
 
                         <ScrollView Orientation="Horizontal"
-                                Margin="-30,0">
+                                    Margin="-30,0">
                             <HorizontalStackLayout
                                 Spacing="15"
-                                    Padding="30,0"
+                                Padding="30,0"
                                 BindableLayout.ItemsSource="{Binding Projects}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="models:Project">
                                         <controls:ProjectCardView WidthRequest="200">
                                             <controls:ProjectCardView.GestureRecognizers>
                                                 <TapGestureRecognizer Command="{Binding NavigateToProjectCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"
-                                                        CommandParameter="{Binding .}"/>
+                                                                      CommandParameter="{Binding .}"/>
                                             </controls:ProjectCardView.GestureRecognizers>
                                         </controls:ProjectCardView>
                                     </DataTemplate>
@@ -232,8 +242,8 @@
 
                         <Grid HeightRequest="44">
                             <Label Text="Tasks"
-                                    Style="{StaticResource Title2}"
-                                    VerticalOptions="Center"/>
+                                   Style="{StaticResource Title2}"
+                                   VerticalOptions="Center"/>
 
                             <ImageButton
                                 Source="{StaticResource IconClean}"
@@ -294,7 +304,8 @@
             Spacing="{StaticResource LayoutSpacing}"
             VerticalOptions="End"
             HorizontalOptions="End"
-            Margin="30">
+            SafeAreaEdges="None"
+            Margin="0,0,30,0">
             <!-- <VerticalStackLayout.Behaviors>
                 <aloha:AnimateProgressDouble
                     x:Name="AddButtonAnimation"
@@ -323,7 +334,7 @@
                             x:DataType="aloha:AnimateProgressDouble"/>
                     </aloha:AnimateProgressDouble.Minimum>
                 </aloha:AnimateProgressDouble>
-            </VerticalStackLayout.Behaviors> -->            
+            </VerticalStackLayout.Behaviors> -->
             <Button x:Name="CameraButton"
                     ImageSource="{StaticResource IconCamera}"
                     BackgroundColor="{toolkit:AppThemeResource Primary}"
@@ -362,7 +373,7 @@
 
         <!-- Settings Bottom Sheet -->
         <bottomSheet:SfBottomSheet x:Name="SettingsSheet"
-                                   IsOpen="{Binding IsSettingsSheetOpen, Mode=TwoWay}"                                    
+                                   IsOpen="{Binding IsSettingsSheetOpen, Mode=TwoWay}"
                                    GrabberBackground="{toolkit:AppThemeResource OnBackground}"
                                    GrabberHeight="5"
                                    Background="{toolkit:AppThemeResource Surface1}"
@@ -370,28 +381,28 @@
             <bottomSheet:SfBottomSheet.BottomSheetContent>
                 <ScrollView>
                     <VerticalStackLayout Padding="24"
-                            Spacing="24">
+                                         Spacing="24">
                         <Label Text="Settings"
-                                FontAttributes="Bold"
-                                FontSize="24"
-                                HorizontalOptions="Center"/>
+                               FontAttributes="Bold"
+                               FontSize="24"
+                               HorizontalOptions="Center"/>
 
                         <sf:SfTextInputLayout IsHintAlwaysFloated="True"
-                                Hint="Enable Telepathy"
-                                Padding="8">
+                                              Hint="Enable Telepathy"
+                                              Padding="8">
                             <Switch IsToggled="{Binding IsTelepathyEnabled, Mode=TwoWay}"
                                     OnColor="{toolkit:AppThemeResource Primary}"/>
                         </sf:SfTextInputLayout>
-                        
+
                         <sf:SfTextInputLayout IsHintAlwaysFloated="True"
-                                Hint="Enable Location Services"
-                                Padding="8">
+                                              Hint="Enable Location Services"
+                                              Padding="8">
                             <VerticalStackLayout Spacing="8">
                                 <Switch IsToggled="{Binding IsLocationEnabled, Mode=TwoWay}"
                                         OnColor="{toolkit:AppThemeResource Primary}"/>
 
                                 <Grid ColumnDefinitions="*, Auto"
-                                        IsVisible="{Binding IsLocationEnabled}">
+                                      IsVisible="{Binding IsLocationEnabled}">
                                     <Label Text="{Binding CurrentLocation}"
                                            VerticalOptions="Center"
                                            Margin="0,8,0,0"/>
@@ -414,20 +425,20 @@
                         <sf:SfTextInputLayout
                             Hint="OpenAI API Key">
                             <Entry Text="{Binding OpenAIApiKey, Mode=TwoWay}"
-                                    Placeholder="Enter API Key"
-                                    IsPassword="True"/>
+                                   Placeholder="Enter API Key"
+                                   IsPassword="True"/>
                         </sf:SfTextInputLayout>
 
                         <sf:SfTextInputLayout
                             Hint="Google Places API Key">
                             <Entry Text="{Binding GooglePlacesApiKeyEntry, Mode=TwoWay}"
-                                    Placeholder="Enter Google Places API Key"
-                                    IsPassword="True"/>
+                                   Placeholder="Enter Google Places API Key"
+                                   IsPassword="True"/>
                         </sf:SfTextInputLayout>
 
                         <sf:SfTextInputLayout IsHintAlwaysFloated="True"
-                                Hint="Calendar(s)"
-                                Padding="8">
+                                              Hint="Calendar(s)"
+                                              Padding="8">
 
                             <VerticalStackLayout Spacing="10">
                                 <ActivityIndicator IsRunning="{Binding IsLoadingCalendars}"
@@ -442,7 +453,7 @@
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="models:CalendarInfo">
                                             <Grid ColumnDefinitions="*, Auto"
-                                                    Padding="0,5">
+                                                  Padding="0,5">
                                                 <Label Text="{Binding Name}"
                                                        VerticalOptions="Center"/>
                                                 <CheckBox Grid.Column="1"
@@ -454,7 +465,7 @@
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>
 
-                                
+
                                 <Button
                                     Text="{Binding CalendarButtonText}"
                                     Command="{Binding ToggleCalendarCommand}"

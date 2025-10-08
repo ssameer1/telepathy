@@ -9,6 +9,7 @@
              xmlns:converters="clr-namespace:Telepathic.Converters"
              x:DataType="pageModel:TaskDetailPageModel"
              x:Class="Telepathic.Pages.TaskDetailPage"
+             SafeAreaEdges="None"
              Title="Task">
 
     <ContentPage.Resources>
@@ -39,16 +40,17 @@
         </HorizontalStackLayout>
     </Shell.TitleView>
 
-    <Grid>
+    <Grid SafeAreaEdges="None">
         <ScrollView>
             <VerticalStackLayout Spacing="{StaticResource LayoutSpacing}"
-                    Padding="{StaticResource LayoutPadding}">
+                                 Padding="{StaticResource LayoutPadding}">
                 <sf:SfTextInputLayout
                     Hint="Task">
                     <Entry
                         Text="{Binding Title}">
                         <Entry.Behaviors>
-                            <toolkit:EventToCommandBehavior EventName="Unfocused" Command="{Binding TitleUnfocusedCommand}"/>
+                            <toolkit:EventToCommandBehavior EventName="Unfocused"
+                                                            Command="{Binding TitleUnfocusedCommand}"/>
                         </Entry.Behaviors>
                     </Entry>
                 </sf:SfTextInputLayout>
@@ -72,61 +74,62 @@
 
                 <!-- Assist Type Section (collapsed in SfExpander) -->
                 <!-- <sf:SfTextInputLayout Hint="Assist Type"> -->
-                <expander:SfExpander IsExpanded="False" HeaderIconPosition="None">
+                <expander:SfExpander IsExpanded="False"
+                                     HeaderIconPosition="None">
                     <expander:SfExpander.Header>
                         <HorizontalStackLayout Spacing="8"
-                                Margin="8,12">
+                                               Margin="8,12">
                             <Image x:Name="Caret"
-                                    Source="{StaticResource IconCaretRight}"
-                                    WidthRequest="24"
-                                    HeightRequest="24"
-                                    VerticalOptions="Center"/>
+                                   Source="{StaticResource IconCaretRight}"
+                                   WidthRequest="24"
+                                   HeightRequest="24"
+                                   VerticalOptions="Center"/>
                             <Label Text="Show Assist Options"
-                                    HorizontalOptions="Start"
-                                    VerticalOptions="Center"/>
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center"/>
                         </HorizontalStackLayout>
                     </expander:SfExpander.Header>
                     <expander:SfExpander.Content>
                         <Grid ColumnDefinitions="*,*"
                               RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                               ColumnSpacing="10"
-                                RowSpacing="10">
+                              RowSpacing="10">
                             <!-- Row 1 -->
                             <RadioButton Grid.Row="1"
-                                    Grid.Column="0"
+                                         Grid.Column="0"
                                          Content="None"
                                          IsChecked="{Binding AssistType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:AssistType.None},Mode=OneWay}"
                                          GroupName="AssistType"/>
                             <RadioButton Grid.Row="1"
-                                    Grid.Column="1"
+                                         Grid.Column="1"
                                          Content="Calendar"
                                          IsChecked="{Binding AssistType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:AssistType.Calendar},Mode=OneWay}"
                                          GroupName="AssistType"/>
                             <!-- Row 2 -->
                             <RadioButton Grid.Row="2"
-                                    Grid.Column="0"
+                                         Grid.Column="0"
                                          Content="Maps/Location"
                                          IsChecked="{Binding AssistType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:AssistType.Maps},Mode=OneWay}"
                                          GroupName="AssistType"/>
                             <RadioButton Grid.Row="2"
-                                    Grid.Column="1"
+                                         Grid.Column="1"
                                          Content="Phone"
                                          IsChecked="{Binding AssistType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:AssistType.Phone},Mode=OneWay}"
                                          GroupName="AssistType"/>
                             <!-- Row 3 -->
                             <RadioButton Grid.Row="3"
-                                    Grid.Column="0"
+                                         Grid.Column="0"
                                          Content="Email"
                                          IsChecked="{Binding AssistType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:AssistType.Email},Mode=OneWay}"
                                          GroupName="AssistType"/>
                             <RadioButton Grid.Row="3"
-                                    Grid.Column="1"
+                                         Grid.Column="1"
                                          Content="AI"
                                          IsChecked="{Binding AssistType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:AssistType.AI},Mode=OneWay}"
                                          GroupName="AssistType"/>
                             <!-- Row 4 -->
                             <RadioButton Grid.Row="4"
-                                    Grid.Column="0"
+                                         Grid.Column="0"
                                          Content="Browser"
                                          IsChecked="{Binding AssistType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:AssistType.Browser},Mode=OneWay}"
                                          GroupName="AssistType"/>
@@ -140,11 +143,12 @@
                                     IsChecked="{Binding AnalyzeForAssist}"/>
                             </HorizontalStackLayout>
 
-                            <sf:SfTextInputLayout Grid.Row="5" Grid.ColumnSpan="2"
-                                Hint="Assist Data">
+                            <sf:SfTextInputLayout Grid.Row="5"
+                                                  Grid.ColumnSpan="2"
+                                                  Hint="Assist Data">
                                 <Entry
                                     Text="{Binding AssistData}"
-                                    Placeholder="Enter phone number, email, address, etc." />
+                                    Placeholder="Enter phone number, email, address, etc."/>
                             </sf:SfTextInputLayout>
 
 
@@ -186,7 +190,7 @@
                 </expander:SfExpander>
                 <!-- </sf:SfTextInputLayout> -->
 
-                
+
 
                 <Button
                     HeightRequest="{OnIdiom 44, Desktop=60}"

@@ -9,63 +9,64 @@
              xmlns:controls="clr-namespace:Telepathic.Pages.Controls"
              x:Class="Telepathic.Pages.PhotoPage"
              x:DataType="pageModels:PhotoPageModel"
+             x:Name="ThisPage"
              Title="Photo Analysis">
-             
+
     <ContentPage.Behaviors>
         <toolkit:EventToCommandBehavior
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference ThisPage}, x:DataType=ContentPage}"
             EventName="Appearing"
             Command="{Binding PageAppearingCommand}"/>
     </ContentPage.Behaviors>
-    
+
     <ContentPage.Resources>
         <ResourceDictionary>
-            
+
         </ResourceDictionary>
     </ContentPage.Resources>
-    
+
     <Grid Padding="{StaticResource LayoutPadding}">
         <!-- Analyzing Phase -->
         <Grid IsVisible="{Binding Phase, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pageModels:PhotoPhase.Analyzing}}"
               RowDefinitions="*,Auto,Auto,Auto,Auto">
-            
+
             <!-- Image with scanner animation -->
-            <Grid 
-                Grid.Row="0" 
+            <Grid
+                Grid.Row="0"
                 Grid.RowSpan="2">
                 <!-- The image itself -->
                 <Image Source="{Binding ImageSource}"
-                        Aspect="AspectFill"
-                        HorizontalOptions="Fill"
-                        VerticalOptions="Fill"
-                        />
-                
+                       Aspect="AspectFill"
+                       HorizontalOptions="Fill"
+                       VerticalOptions="Fill"/>
+
                 <!-- Scanner animation -->
                 <Grid x:Name="ScannerAnimation">
                     <!-- Scanner line -->
                     <BoxView x:Name="ScannerLine"
-                                BackgroundColor="{AppThemeBinding Light=#4a90e280, Dark=#9b59b680}"
-                                HeightRequest="2"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Start"
-                                Margin="0" />
-                    
+                             BackgroundColor="{AppThemeBinding Light=#4a90e280, Dark=#9b59b680}"
+                             HeightRequest="2"
+                             HorizontalOptions="Fill"
+                             VerticalOptions="Start"
+                             Margin="0"/>
+
                     <!-- Gradient overlays for scanner effect -->
                     <BoxView x:Name="TopGradient"
-                                BackgroundColor="{AppThemeBinding Light=#4a90e220, Dark=#9b59b620}"
-                                HeightRequest="40"
-                                Opacity="0.6"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Start" />
-                                
+                             BackgroundColor="{AppThemeBinding Light=#4a90e220, Dark=#9b59b620}"
+                             HeightRequest="40"
+                             Opacity="0.6"
+                             HorizontalOptions="Fill"
+                             VerticalOptions="Start"/>
+
                     <BoxView x:Name="BottomGradient"
-                                BackgroundColor="{AppThemeBinding Light=#4a90e220, Dark=#9b59b620}"
-                                HeightRequest="40"
-                                Opacity="0.6"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="End" />
+                             BackgroundColor="{AppThemeBinding Light=#4a90e220, Dark=#9b59b620}"
+                             HeightRequest="40"
+                             Opacity="0.6"
+                             HorizontalOptions="Fill"
+                             VerticalOptions="End"/>
                 </Grid>
             </Grid>
-            
+
             <!-- Activity indicator -->
             <controls:ActivityIndicatorView
                 Grid.Row="2"
@@ -79,8 +80,9 @@
                 ShimmerStartColor="#4a90e2"
                 ShimmerEndColor="#9b59b6"/>
 
-            <sf:SfTextInputLayout Hint="Additional Instructions" Grid.Row="3">
-                <Entry Text="{Binding AnalysisInstructions}" />
+            <sf:SfTextInputLayout Hint="Additional Instructions"
+                    Grid.Row="3">
+                <Entry Text="{Binding AnalysisInstructions}"/>
             </sf:SfTextInputLayout>
 
             <Button Text="Find Projects and Tasks"
@@ -88,12 +90,12 @@
                     Command="{Binding AnalyzeImageCommand}"
                     HorizontalOptions="Fill"
                     IsEnabled="{Binding IsAnalyzingContext, Converter={StaticResource InverseBoolConverter}}"/>
-            
+
         </Grid>
-        
+
         <!-- Review Phase -->
-        <ScrollView 
-            IsVisible="{Binding Phase, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pageModels:PhotoPhase.Reviewing}}"> 
+        <ScrollView
+            IsVisible="{Binding Phase, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pageModels:PhotoPhase.Reviewing}}">
             <VerticalStackLayout Spacing="{StaticResource LayoutSpacing}">
                 <!-- Image preview -->
                 <Border BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#333333}"
@@ -102,35 +104,37 @@
                         HeightRequest="120"
                         Margin="0,10">
                     <Image Source="{Binding ImageSource}"
-                           Aspect="AspectFit" />
+                           Aspect="AspectFit"/>
                 </Border>
-                
+
                 <!-- Status -->
                 <Label Text="{Binding AnalysisStatusDetail}"
                        TextColor="{AppThemeBinding Light=#4a90e2, Dark=#9b59b6}"
                        HorizontalOptions="Center"
                        Margin="0,5"/>
-                
+
                 <!-- Projects Section -->
-                <VerticalStackLayout 
+                <VerticalStackLayout
                     Spacing="{StaticResource LayoutSpacing}">
-                    <Label Text="Extracted Projects and Tasks" Style="{StaticResource Title1}" TextColor="{toolkit:AppThemeResource Tertiary}"/>
+                    <Label Text="Extracted Projects and Tasks"
+                            Style="{StaticResource Title1}"
+                            TextColor="{toolkit:AppThemeResource Tertiary}"/>
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Projects}"
-                        Spacing="{StaticResource LayoutSpacing}">
+                                         Spacing="{StaticResource LayoutSpacing}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:Project">
                                 <VerticalStackLayout Spacing="{StaticResource LayoutSpacing}">
-                                    <Label Text="{Binding Name}" 
-                                        TextColor="{toolkit:AppThemeResource Quaternary}"
-                                        Style="{StaticResource Title2}" />
+                                    <Label Text="{Binding Name}"
+                                           TextColor="{toolkit:AppThemeResource Quaternary}"
+                                           Style="{StaticResource Title2}"/>
                                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Tasks}"
-                                        Spacing="{StaticResource LayoutSpacing}">
+                                                         Spacing="{StaticResource LayoutSpacing}">
                                         <BindableLayout.ItemTemplate>
                                             <DataTemplate x:DataType="models:ProjectTask">
-                                                <controls:TaskView 
+                                                <controls:TaskView
                                                     TaskCompletedCommand="{Binding TaskCompletedCommand, Source={RelativeSource AncestorType={x:Type pageModels:PhotoPageModel}}, x:DataType=pageModels:PhotoPageModel}"
                                                     AcceptRecommendationCommand="{Binding AcceptRecommendationCommand, Source={RelativeSource AncestorType={x:Type pageModels:PhotoPageModel}}, x:DataType=pageModels:PhotoPageModel}"
-                                                    RejectRecommendationCommand="{Binding RejectRecommendationCommand, Source={RelativeSource AncestorType={x:Type pageModels:PhotoPageModel}}, x:DataType=pageModels:PhotoPageModel}" />
+                                                    RejectRecommendationCommand="{Binding RejectRecommendationCommand, Source={RelativeSource AncestorType={x:Type pageModels:PhotoPageModel}}, x:DataType=pageModels:PhotoPageModel}"/>
                                             </DataTemplate>
                                         </BindableLayout.ItemTemplate>
                                     </VerticalStackLayout>
@@ -138,10 +142,10 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
-                </VerticalStackLayout>                
-                
+                </VerticalStackLayout>
+
                 <!-- No tasks found message -->
-                <VerticalStackLayout 
+                <VerticalStackLayout
                     IsVisible="{Binding Projects.Count, Converter={StaticResource IsEqualConverter}, ConverterParameter=0}"
                     HorizontalOptions="Center"
                     Margin="0,40">
@@ -151,23 +155,23 @@
                            HorizontalOptions="Center"
                            Opacity="0.6"/>
                     <Label Text="No tasks were extracted from this image"
-                           Style="{StaticResource SubHeadline}" 
+                           Style="{StaticResource SubHeadline}"
                            HorizontalOptions="Center"
                            Margin="0,10"/>
                     <Button Text="Try Again"
                             Command="{Binding ReanalyzeCommand}"
-                            HorizontalOptions="Center" />
+                            HorizontalOptions="Center"/>
                 </VerticalStackLayout>
-                
+
                 <!-- Action Buttons -->
                 <HorizontalStackLayout Spacing="{StaticResource LayoutSpacing}">
                     <Button Text="Cancel"
                             Command="{Binding GoBackCommand}"
-                            HorizontalOptions="End" />
-                            
+                            HorizontalOptions="End"/>
+
                     <Button Text="Save Tasks"
                             Command="{Binding SaveCommand}"
-                            HorizontalOptions="Start" />
+                            HorizontalOptions="Start"/>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </ScrollView>

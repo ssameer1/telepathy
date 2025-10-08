@@ -7,29 +7,34 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="Telepathic.Pages.ProjectListPage"
              x:DataType="pageModels:ProjectListPageModel"
+             SafeAreaEdges="None"
+             x:Name="ThisPage"
              Title="Projects">
 
 
     <ContentPage.Behaviors>
         <toolkit:EventToCommandBehavior
-                EventName="Appearing"                
-                Command="{Binding AppearingCommand}" />
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference ThisPage}, x:DataType=ContentPage}"
+            EventName="Appearing"
+            Command="{Binding AppearingCommand}"/>
     </ContentPage.Behaviors>
-    <Grid>
+    <Grid SafeAreaEdges="None">
         <ScrollView>
-            <VerticalStackLayout 
-                BindableLayout.ItemsSource="{Binding Projects}" 
-                Margin="{StaticResource LayoutPadding}" 
+            <VerticalStackLayout
+                BindableLayout.ItemsSource="{Binding Projects}"
+                Margin="{StaticResource LayoutPadding}"
                 Spacing="{StaticResource LayoutSpacing}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:Project">
                         <Border>
                             <VerticalStackLayout Padding="10">
-                                <Label Text="{Binding Name}" FontSize="24" />
-                                <Label Text="{Binding Description}" />
+                                <Label Text="{Binding Name}"
+                                       FontSize="24"/>
+                                <Label Text="{Binding Description}"/>
                             </VerticalStackLayout>
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding NavigateToProjectCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectListPageModel}}, x:DataType=pageModels:ProjectListPageModel}" CommandParameter="{Binding .}"/>
+                                <TapGestureRecognizer Command="{Binding NavigateToProjectCommand, Source={RelativeSource AncestorType={x:Type pageModels:ProjectListPageModel}}, x:DataType=pageModels:ProjectListPageModel}"
+                                                      CommandParameter="{Binding .}"/>
                             </Border.GestureRecognizers>
                         </Border>
                     </DataTemplate>
@@ -37,7 +42,12 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <controls:AddButton 
-            Command="{Binding AddProjectCommand}" />
+        <ContentView SafeAreaEdges="None"
+                VerticalOptions="End"
+                HorizontalOptions="End">
+            <controls:AddButton
+                Command="{Binding AddProjectCommand}"/>
+        </ContentView>
+
     </Grid>
 </ContentPage>

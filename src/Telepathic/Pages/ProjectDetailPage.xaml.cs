@@ -14,8 +14,8 @@ public partial class ProjectDetailPage : ContentPage
 
 public class ChipDataTemplateSelector : DataTemplateSelector
 {
-	public required DataTemplate SelectedTagTemplate { get; set; }
-	public required DataTemplate NormalTagTemplate { get; set; }
+	public DataTemplate SelectedTagTemplate { get; set; }
+	public DataTemplate NormalTagTemplate { get; set; }
 
 	protected override DataTemplate OnSelectTemplate(object item, BindableObject container)
 	{
