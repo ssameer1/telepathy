@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Plugin.Maui.Audio;
 using Telepathic.Models;
 using Telepathic.Services;
+using Telepathic.Data.UserMemory;
 
 namespace Telepathic.PageModels;
 
@@ -25,6 +26,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
     private readonly ModalErrorHandler _errorHandler;
     private readonly ILogger<VoicePageModel> _logger;
     private readonly TaskAssistHandler _taskAssistHandler;
+    private readonly IUserMemoryStore _memoryStore;
 
     IAudioSource? _audioSource = null;
 
@@ -62,7 +64,8 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
         ProjectRepository projectRepository,
         TaskRepository taskRepository,
         ILogger<VoicePageModel> logger,
-        TaskAssistHandler taskAssistHandler)
+        TaskAssistHandler taskAssistHandler,
+        IUserMemoryStore memoryStore)
     {
         // _audio = audio;
         _audioManager = audioManager;
@@ -73,6 +76,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
         _taskRepository = taskRepository;
         _logger = logger;
         _taskAssistHandler = taskAssistHandler;
+        _memoryStore = memoryStore;
 
         _logger.LogInformation("Voice Modal Page Model initialized");
     }
@@ -290,6 +294,17 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
 
             if (response?.Result != null)
             {
+                // Track successful voice analysis
+                await _memoryStore.LogEventAsync(MemoryEvent.Create(
+                    "voice:analyze",
+                    null,
+                    new { 
+                        project_count = response.Result.Projects.Count,
+                        task_count = response.Result.Projects.Sum(p => p.Tasks.Count),
+                        duration_ms = _stopwatch.ElapsedMilliseconds
+                    },
+                    1.5));
+
                 // Mark all extracted tasks as recommendations
                 foreach (var project in response.Result.Projects)
                 {

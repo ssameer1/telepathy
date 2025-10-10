@@ -8,6 +8,7 @@ using Microsoft.Maui.ApplicationModel; // PhoneDialer, Email, Launcher
 using Microsoft.Maui.ApplicationModel.Communication; // PhoneDialer, EmailMessage, Email
 using Microsoft.Maui.Controls; // Shell
 using Plugin.Maui.CalendarStore; // Calendar support
+using Telepathic.Data.UserMemory;
 
 namespace Telepathic.PageModels;
 
@@ -22,6 +23,7 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 	private readonly IChatClientService _chatClientService;
 	private readonly ICalendarStore _calendarStore;
 	private readonly TaskAssistHandler _taskAssistHandler;
+	private readonly IUserMemoryStore _memoryStore;
 
 	// Interface implementations
 	IAsyncRelayCommand<ProjectTask> IProjectTaskPageModel.NavigateToTaskCommand => NavigateToTaskCommand;
@@ -91,7 +93,7 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 
 	public bool HasRecommendedTasks
 	 	=> RecommendedTasks?.Count > 0;
-	public ProjectDetailPageModel(ProjectRepository projectRepository, TaskRepository taskRepository, CategoryRepository categoryRepository, TagRepository tagRepository, ModalErrorHandler errorHandler, IChatClientService chatClientService, ICalendarStore calendarStore, TaskAssistHandler taskAssistHandler)
+	public ProjectDetailPageModel(ProjectRepository projectRepository, TaskRepository taskRepository, CategoryRepository categoryRepository, TagRepository tagRepository, ModalErrorHandler errorHandler, IChatClientService chatClientService, ICalendarStore calendarStore, TaskAssistHandler taskAssistHandler, IUserMemoryStore memoryStore)
 	{
 		_projectRepository = projectRepository;
 		_taskRepository = taskRepository;
@@ -101,6 +103,7 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 		_chatClientService = chatClientService;
 		_calendarStore = calendarStore;
 		_taskAssistHandler = taskAssistHandler;
+		_memoryStore = memoryStore;
 	}
 
 	partial void OnNameChanged(string value)
@@ -139,6 +142,19 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 			BusyDetails = $"We have {response?.Result.Tasks.Count} tasks to recommend that we think could be amazing.";
 
 			await Task.Delay(2000);
+
+			if (response?.Result != null)
+			{
+				// Track AI recommendation usage
+				await _memoryStore.LogEventAsync(MemoryEvent.Create(
+					"ai:recommend",
+					projectName,
+					new { 
+						category = response.Result.Category,
+						task_count = response.Result.Tasks.Count
+					},
+					1.5));
+			}
 
 			if (response?.Result != null)
 			{
@@ -283,6 +299,13 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 			Tasks = _project.Tasks;
 
 			Icon = _project.Icon;
+
+			// Track project view in memory
+			await _memoryStore.LogEventAsync(MemoryEvent.Create(
+				"project:view",
+				_project.Name,
+				new { categoryId = _project.CategoryID, taskCount = _project.Tasks.Count },
+				1.0));
 
 			Categories = await _categoryRepository.ListAsync();
 			Category = Categories?.FirstOrDefault(c => c.ID == _project.CategoryID);

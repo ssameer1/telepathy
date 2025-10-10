@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Telepathic.Models;
+using Telepathic.Data.UserMemory;
 
 namespace Telepathic.PageModels;
 
@@ -13,6 +14,7 @@ public partial class TaskDetailPageModel : ObservableObject, IQueryAttributable
 	private readonly ModalErrorHandler _errorHandler;
 	private readonly TaskAssistAnalyzer? _taskAssistAnalyzer;
 	private readonly TaskAssistHandler _taskAssistHandler;
+	private readonly IUserMemoryStore _memoryStore;
 
 	[ObservableProperty]
 	private string _title = string.Empty;
@@ -45,6 +47,7 @@ public partial class TaskDetailPageModel : ObservableObject, IQueryAttributable
 		TaskRepository taskRepository,
 		ModalErrorHandler errorHandler,
 		TaskAssistHandler taskAssistHandler,
+		IUserMemoryStore memoryStore,
 		TaskAssistAnalyzer? taskAssistAnalyzer = null)
 	{
 		_projectRepository = projectRepository;
@@ -52,6 +55,7 @@ public partial class TaskDetailPageModel : ObservableObject, IQueryAttributable
 		_errorHandler = errorHandler;
 		_taskAssistAnalyzer = taskAssistAnalyzer;
 		_taskAssistHandler = taskAssistHandler;
+		_memoryStore = memoryStore;
 	}
 
 	public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -211,8 +215,24 @@ public partial class TaskDetailPageModel : ObservableObject, IQueryAttributable
 		if (Project?.ID == projectId && !Project.Tasks.Contains(_task))
 			Project.Tasks.Add(_task);
 
+		var isNewTask = _task.ID == 0;
+
 		if (_task.ProjectID > 0)
 			_taskRepository.SaveItemAsync(_task).FireAndForgetSafeAsync(_errorHandler);
+
+		// Track task creation in memory
+		if (isNewTask)
+		{
+			await _memoryStore.LogEventAsync(MemoryEvent.Create(
+				"task:create",
+				_task.Title,
+				new { 
+					projectName = Project?.Name,
+					assistType = _task.AssistType.ToString(),
+					source = "manual"
+				},
+				1.0));
+		}
 
 		await Shell.Current.GoToAsync("..?refresh=true");
 

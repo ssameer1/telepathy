@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using Telepathic.Models;
 using Telepathic.Services;
+using Telepathic.Data.UserMemory;
 
 namespace Telepathic.PageModels;
 
@@ -18,6 +19,7 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
     private readonly ModalErrorHandler _errorHandler;
     private readonly ILogger<PhotoPageModel> _logger;
     private readonly TaskAssistHandler _taskAssistHandler;
+    private readonly IUserMemoryStore _memoryStore;
     private readonly Stopwatch _stopwatch = new();
 
     [ObservableProperty] private string _imagePath = string.Empty;
@@ -45,7 +47,8 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
         IChatClientService chatClientService,
         ModalErrorHandler errorHandler,
         TaskAssistHandler taskAssistHandler,
-        ILogger<PhotoPageModel> logger)
+        ILogger<PhotoPageModel> logger,
+        IUserMemoryStore memoryStore)
     {
         _projectRepository = projectRepository;
         _taskRepository = taskRepository;
@@ -53,6 +56,7 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
         _errorHandler = errorHandler;
         _taskAssistHandler = taskAssistHandler;
         _logger = logger;
+        _memoryStore = memoryStore;
     }
     
     [RelayCommand]
@@ -217,6 +221,16 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
             
             if (Projects.Count > 0)
             {
+                // Track successful photo analysis
+                await _memoryStore.LogEventAsync(MemoryEvent.Create(
+                    "photo:analyze",
+                    null,
+                    new { 
+                        project_count = Projects.Count,
+                        task_count = Projects.Sum(p => p.Tasks.Count)
+                    },
+                    1.5));
+
                 AnalysisStatusDetail = $"Successfully extracted {Projects.Count} projects and {Projects.Sum(p => p.Tasks.Count)} tasks!";
             }
             else

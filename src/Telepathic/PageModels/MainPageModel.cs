@@ -8,6 +8,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Telepathic.ViewModels;
 using Telepathic.Tools;
+using Telepathic.Data.UserMemory;
 
 namespace Telepathic.PageModels;
 
@@ -25,6 +26,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 	private readonly ILogger _logger;
 	private readonly TaskAssistHandler _taskAssistHandler;
 	private readonly LocationTools _locationTools;
+	private readonly IUserMemoryStore _memoryStore;
 	private CancellationTokenSource? _cancelTokenSource;
 	private DateTime _lastPriorityCheck = DateTime.MinValue;
 	private const int PRIORITY_CHECK_HOURS = 4;
@@ -241,7 +243,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 	public MainPageModel(SeedDataService seedDataService, ProjectRepository projectRepository,
 	TaskRepository taskRepository, CategoryRepository categoryRepository, ModalErrorHandler errorHandler,
 	ICalendarStore calendarStore, ILogger<MainPageModel> logger, IChatClientService chatClientService,
-	TaskAssistHandler taskAssistHandler, LocationTools locationTools)
+	TaskAssistHandler taskAssistHandler, LocationTools locationTools, IUserMemoryStore memoryStore)
 	{
 		_projectRepository = projectRepository;
 		_taskRepository = taskRepository;
@@ -253,6 +255,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 		_logger = logger;
 		_taskAssistHandler = taskAssistHandler;
 		_locationTools = locationTools;
+		_memoryStore = memoryStore;
 		// Sync entry fields for UI
 		OpenAIApiKeyEntry = OpenAIApiKey;
 		GooglePlacesApiKeyEntry = GooglePlacesApiKey;
@@ -436,6 +439,17 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 			// Update the database task with the completion status
 			dbTask.IsCompleted = task.IsCompleted;
 			await _taskRepository.SaveItemAsync(dbTask);
+
+			// Track completion event in memory
+			if (task.IsCompleted)
+			{
+				var project = Projects.FirstOrDefault(p => p.ID == task.ProjectID);
+				await _memoryStore.LogEventAsync(MemoryEvent.Create(
+					"task:complete",
+					task.Title,
+					new { projectName = project?.Name, assistType = task.AssistType.ToString() },
+					1.0));
+			}
 		}
 		else
 		{
@@ -964,6 +978,17 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 					var apiResponse = await chatClient.GetResponseAsync<PriorityTaskResult>(sb.ToString());
 					if (apiResponse?.Result != null)
 					{
+						// Track AI telepathy usage
+						await _memoryStore.LogEventAsync(MemoryEvent.Create(
+							"ai:telepathy",
+							null,
+							new { 
+								priority_tasks_found = apiResponse.Result.PriorityTasks?.Count ?? 0,
+								has_calendar = events.Any(),
+								has_location = IsLocationEnabled
+							},
+							1.5));
+
 						// Update personalized greeting if it exists
 						if (!string.IsNullOrEmpty(apiResponse.Result.PersonalizedGreeting))
 						{
@@ -1046,6 +1071,13 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 	[RelayCommand]
 	private async Task VoiceRecord()
 	{
+		// Track voice feature usage
+		await _memoryStore.LogEventAsync(MemoryEvent.Create(
+			"feature:voice",
+			null,
+			new { source = "main_page" },
+			1.0));
+
 		await AppShell.Current.GoToAsync("voice");
 	}
 
@@ -1093,6 +1125,14 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 		try
 		{
 			IsBusy = true;
+
+			// Track photo feature usage
+			await _memoryStore.LogEventAsync(MemoryEvent.Create(
+				"feature:photo",
+				null,
+				new { source = "camera" },
+				1.0));
+
 			// Navigate directly to PhotoPage; photo capture will occur on appearing
 			await Shell.Current.GoToAsync("photo");
 		}

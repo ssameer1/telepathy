@@ -31,6 +31,8 @@ public partial class MemoryDebugPageModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = "Ready";
 
+    public string DatabasePath => MemoryConstants.DatabasePath;
+
     public MemoryDebugPageModel(IUserMemoryStore memoryStore, ILogger<MemoryDebugPageModel> logger)
     {
         _memoryStore = memoryStore;

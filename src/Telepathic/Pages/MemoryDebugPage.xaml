@@ -16,6 +16,17 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
 
+            <Label Text="🧠 Memory Debug Console"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"/>
+
+            <Label Text="{Binding DatabasePath}"
+                   FontSize="10"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,10"/>
+
             <!-- Status Message -->
             <Label Text="{Binding StatusMessage}"
                    FontAttributes="Bold"
@@ -27,15 +38,20 @@
                               Color="{toolkit:AppThemeResource Primary}"/>
 
             <!-- Action Buttons -->
-            <Grid ColumnDefinitions="*, *" ColumnSpacing="10" RowSpacing="10">
+            <Grid ColumnDefinitions="*, *" 
+                  RowDefinitions="Auto, Auto" 
+                  ColumnSpacing="10" 
+                  RowSpacing="10">
                 <Button Text="Create Test Data"
                         Command="{Binding CreateTestEventsCommand}"
                         IsEnabled="{Binding IsBusy, Converter={toolkit:InvertedBoolConverter}}"
+                        Grid.Row="0"
                         Grid.Column="0"/>
                 
                 <Button Text="Refresh Data"
                         Command="{Binding LoadDataCommand}"
                         IsEnabled="{Binding IsBusy, Converter={toolkit:InvertedBoolConverter}}"
+                        Grid.Row="0"
                         Grid.Column="1"/>
 
                 <Button Text="Rebuild Snapshot"
