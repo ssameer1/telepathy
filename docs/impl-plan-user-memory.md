@@ -1,0 +1,314 @@
+# 🧠 User Memory System - Implementation Plan
+
+**Branch**: `feature/user-memory-system`  
+**Start Date**: October 10, 2025  
+**Target**: MVP with full instrumentation and My Data UI
+
+---
+
+## 📋 Implementation Decisions
+
+### Decision Log
+1. **Fact Creation Strategy**: Option A - Explicit `AddFactAsync` calls for obvious patterns
+2. **Snapshot Rebuild Triggers**: All three (N events, significant events, app resume)
+3. **"About Me" Migration**: Option B - Stay in Preferences, include in snapshot
+4. **User Profile Access**: Option A - New Shell tab bar item
+
+### Technical Decisions
+- **Database**: Separate `memory.db3` database (not shared with app database)
+- **User Model**: Single user with constant UserId = "default"
+- **Repository Pattern**: Continue using `Microsoft.Data.Sqlite` with manual ADO.NET
+- **Background Jobs**: None - all triggered by user actions or app lifecycle
+
+---
+
+## 🎯 Complete Instrumentation Map
+
+### Tier 1: Core Task Actions (Highest Signal)
+- [x] Task.Complete (time of day, project, topic)
+- [ ] Task.Uncomplete (context matters!)
+- [ ] Task.Create (source: manual/voice/photo, time, project)
+- [ ] Task.Delete
+- [ ] Task.Edit (title changes)
+- [ ] Task.ViewDetails (engagement signal)
+- [ ] PriorityTask.ViewReasoning (user curiosity about AI suggestions)
+- [ ] PriorityTask.Assist (location assist, other assist types)
+
+### Tier 2: Project Interactions
+- [ ] Project.Create
+- [ ] Project.View (navigation to detail page)
+- [ ] Project.Edit
+- [ ] Project.Delete
+
+### Tier 3: AI-Powered Features
+- [ ] Voice.StartRecording
+- [ ] Voice.CompleteAnalysis (success/failure, duration)
+- [ ] Voice.ExtractTasks (how many tasks extracted)
+- [ ] Photo.Capture
+- [ ] Photo.Analyze (success/failure)
+- [ ] Photo.ExtractTasks (how many tasks extracted)
+- [ ] Telepathy.Toggle (on/off preference)
+
+### Tier 4: Context & Preferences
+- [ ] Location.Enable
+- [ ] Location.GetLocation (frequency of checking)
+- [ ] Location.CheckNearby (which tasks trigger location checks)
+- [ ] Calendar.Enable
+- [ ] Calendar.SelectCalendar
+- [ ] Settings.UpdateApiKey (which provider)
+- [ ] Settings.UpdateAboutMe (becomes Profile data)
+
+### Tier 5: Navigation & Lifecycle
+- [ ] Page.Navigate (which pages user visits most)
+- [ ] App.Resume (time between sessions)
+- [ ] App.Background
+- [ ] MainPage.Appear (daily engagement)
+
+---
+
+## 🚀 Phase 1: Foundation & Storage
+
+**Status**: 🔄 In Progress  
+**Target**: Day 1
+
+### Tasks
+- [ ] Create `/Data/UserMemory/` folder structure
+- [ ] Create `MemoryEvent.cs` model
+- [ ] Create `MemoryFact.cs` model
+- [ ] Create `MemorySnapshot.cs` model
+- [ ] Create `MemoryConstants.cs` with UserId constant
+- [ ] Create `IUserMemoryStore.cs` interface
+- [ ] Create `SqliteUserMemoryStore.cs` implementation
+  - [ ] Profile table
+  - [ ] Events table (with indexes)
+  - [ ] Facts table (with unique constraint)
+  - [ ] Snapshot table
+- [ ] Add to DI in `MauiProgram.cs`
+- [ ] Basic unit tests
+
+---
+
+## 🎯 Phase 2: Event Instrumentation
+
+**Status**: ⏳ Pending  
+**Target**: Day 1-2
+
+### Tier 1: Task Actions
+- [ ] `MainPageModel.ToggleTaskCompletionAsync` → log Task.Complete/Uncomplete
+- [ ] `MainPageModel.AddTaskCommand` → log Task.Create (source: manual)
+- [ ] `TaskDetailPageModel.SaveCommand` → log Task.Edit
+- [ ] `TaskDetailPageModel.DeleteCommand` → log Task.Delete
+- [ ] `MainPageModel.NavigateToTaskCommand` → log Task.ViewDetails
+- [ ] Priority task reasoning toggle → log PriorityTask.ViewReasoning
+- [ ] Priority task assist → log PriorityTask.Assist
+
+### Tier 2: Project Actions
+- [ ] `ProjectListPageModel` → log Project.Create
+- [ ] `MainPageModel.NavigateToProjectCommand` → log Project.View
+- [ ] `ProjectDetailPageModel` → log Project.Edit/Delete
+
+### Tier 3: AI Features
+- [ ] `VoicePageModel` → log Voice.* events
+- [ ] `PhotoPageModel` → log Photo.* events
+- [ ] `MainPageModel` → log Telepathy.Toggle
+
+### Test
+- [ ] Verify events are being logged to database
+- [ ] Check event volume and performance
+
+---
+
+## 📸 Phase 3: Snapshot Builder
+
+**Status**: ⏳ Pending  
+**Target**: Day 2
+
+### Tasks
+- [ ] Implement `BuildSnapshotAsync` method
+  - [ ] Fetch high-confidence facts (Score ≥ 0.8)
+  - [ ] Diverse prefix selection
+  - [ ] Recent topic analysis (decayed event weights)
+  - [ ] Format as 8-16 line summary
+- [ ] Implement snapshot caching logic
+  - [ ] Cache snapshot in memory
+  - [ ] Check if rebuild needed (age > 10 min OR event threshold)
+- [ ] Add rebuild triggers
+  - [ ] Event counter (rebuild every 15 events)
+  - [ ] Significant event detection (Project.Create, Telepathy.Toggle, etc.)
+  - [ ] App resume trigger
+- [ ] Implement strategic fact creation
+  - [ ] Morning/evening task completion patterns
+  - [ ] Project affinity (task completion frequency)
+  - [ ] Topic affinity from task titles
+  - [ ] Voice/photo usage preferences
+- [ ] Test snapshot generation
+  - [ ] Verify line count (8-16)
+  - [ ] Verify confidence filtering
+  - [ ] Verify diversity
+
+---
+
+## 🎨 Phase 4: My Data UI
+
+**Status**: ⏳ Pending  
+**Target**: Day 3
+
+### Navigation Structure
+- [ ] Add "Profile" tab to Shell navigation
+- [ ] Create `UserProfilePage.xaml` and `UserProfilePageModel.cs`
+- [ ] Create `MyDataPage.xaml` and `MyDataPageModel.cs`
+- [ ] Add Shell route for "mydata" sub-page
+
+### UserProfilePage
+- [ ] Move settings content from MainPage bottom sheet
+  - [ ] Telepathy toggle
+  - [ ] Location services
+  - [ ] Foundry endpoint/API key
+  - [ ] Google Places API key
+  - [ ] Calendar selection
+  - [ ] About Me text
+- [ ] Add navigation button to My Data page
+- [ ] Update MainPage to remove bottom sheet
+
+### MyDataPage
+- [ ] Display current snapshot (formatted nicely)
+- [ ] Display facts list (key, value, score)
+  - [ ] Sort by score descending
+  - [ ] Color-code by confidence (high/medium/low)
+- [ ] Display recent events (last 20)
+  - [ ] Type, topic, timestamp
+- [ ] Add "Forget Me" button
+  - [ ] Confirmation dialog
+  - [ ] Wipe Events, Facts, Snapshot tables
+  - [ ] Keep Profile table intact
+- [ ] Add "Refresh Snapshot" button (for debugging)
+- [ ] Statistics display
+  - [ ] Total events logged
+  - [ ] Total facts
+  - [ ] Snapshot age
+  - [ ] Last rebuild timestamp
+
+---
+
+## 🤖 Phase 5: AI Integration
+
+**Status**: ⏳ Pending  
+**Target**: Day 3-4
+
+### ChatClientService Enhancement
+- [ ] Add `GetSnapshotContextAsync()` method to `IChatClientService`
+- [ ] Modify `GetResponseAsync` to accept optional context parameter
+- [ ] Update internal prompt construction to prepend context
+
+### Integration Points
+- [ ] **VoicePageModel**: Include snapshot when analyzing voice input
+  - [ ] Prepend snapshot to system message
+  - [ ] Test: "Schedule workout" should recognize morning preference
+- [ ] **PhotoPageModel**: Include snapshot when extracting tasks from photos
+  - [ ] Prepend snapshot to analysis prompt
+- [ ] **TaskAssistAnalyzer**: Use snapshot for priority scoring
+  - [ ] Parse snapshot for relevant preferences
+  - [ ] Adjust priority scores based on facts
+  - [ ] Test: Morning tasks get boosted in morning
+- [ ] **MainPageModel**: Personalized greeting
+  - [ ] Use facts to customize greeting
+  - [ ] Include recent activity context
+
+### Testing
+- [ ] Test voice analysis with snapshot context
+- [ ] Test photo analysis with snapshot context
+- [ ] Test priority scoring changes
+- [ ] Verify greeting personalization
+
+---
+
+## 🧹 Phase 6: Maintenance & Polish
+
+**Status**: ⏳ Pending  
+**Target**: Day 4
+
+### Maintenance Jobs
+- [ ] Implement event pruning (30-day retention)
+  - [ ] Run on app startup
+  - [ ] Delete events older than 30 days
+  - [ ] Cap at 50k events per user
+- [ ] Implement fact decay logic
+  - [ ] Drop facts with Score < 0.2 AND inactive for 30 days
+  - [ ] Cap at 600 facts per user
+- [ ] Implement weight decay function for events
+  - [ ] `w = exp(-(now - event_time) / 7 days)`
+
+### Error Handling
+- [ ] Add try-catch blocks around all memory operations
+- [ ] Log errors but don't break app functionality
+- [ ] Handle database corruption gracefully
+
+### Performance
+- [ ] Add indexes to Events table (UserId, AtUtc DESC)
+- [ ] Add indexes to Facts table (UserId, Key)
+- [ ] Benchmark snapshot generation time
+- [ ] Optimize if > 100ms
+
+### Testing
+- [ ] End-to-end flow test
+- [ ] Performance testing with 10k events
+- [ ] Memory leak testing
+- [ ] UI testing on iOS and Android
+
+---
+
+## 📊 Success Metrics
+
+### MVP Completion Criteria
+- ✅ All tables created and accessible
+- ✅ All Tier 1 & 2 events instrumented
+- ✅ Snapshot generation working (8-16 lines)
+- ✅ My Data UI showing live data
+- ✅ At least one AI integration point working (Voice or Priority)
+- ✅ "Forget Me" functionality working
+- ✅ No performance degradation in app
+
+### Future Enhancements
+- [ ] AI-powered fact inference from events
+- [ ] Vector embeddings for semantic memory
+- [ ] Multi-user profile support
+- [ ] Memory export/import
+- [ ] Background maintenance service (when MAUI supports it)
+- [ ] FTS5 search on events
+- [ ] Memory insights dashboard
+
+---
+
+## 🐛 Known Issues / Tech Debt
+
+*Track issues here as they arise during implementation*
+
+---
+
+## 📝 Notes
+
+### Database Schema Location
+`/Users/davidortinau/work/dotnet-buildai/src/Telepathic/Data/UserMemory/`
+
+### Constants
+- **UserId**: `"default"`
+- **Database**: `memory.db3`
+- **Event Retention**: 30 days
+- **Max Events**: 50,000 per user
+- **Max Facts**: 600 per user
+- **Snapshot Lines**: 8-16
+- **Snapshot Rebuild Threshold**: 15 events
+- **Snapshot Max Age**: 10 minutes
+- **Fact Confidence Threshold**: 0.8 for snapshot inclusion
+
+---
+
+## 🎯 Current Sprint
+
+**Active Phase**: Phase 1 - Foundation & Storage  
+**Next Up**: Create model classes and memory store interface  
+**Blockers**: None
+
+---
+
+*Last Updated: October 10, 2025*

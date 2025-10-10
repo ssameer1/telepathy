@@ -4,6 +4,7 @@ using Plugin.Maui.Audio;
 using Plugin.Maui.CalendarStore;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using Syncfusion.Maui.Toolkit.Hosting;
+using Telepathic.Data.UserMemory;
 using Telepathic.Tools;
 
 namespace Telepathic;
@@ -61,6 +62,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<CategoryRepository>();
 		builder.Services.AddSingleton<TagRepository>();
 		builder.Services.AddSingleton<SeedDataService>();
+		Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<IUserMemoryStore, SqliteUserMemoryStore>(builder.Services);
 		builder.Services.AddSingleton<ModalErrorHandler>();
 		builder.Services.AddSingleton<MainPageModel>();
 		builder.Services.AddSingleton<ProjectListPageModel>();
