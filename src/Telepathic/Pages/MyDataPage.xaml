@@ -161,7 +161,7 @@
                                                          Spacing="2">
                                         <Label Text="{Binding Topic}"
                                                FontSize="12"/>
-                                        <Label Text="{Binding AtUtc, StringFormat='{0:MMM d, h:mm tt}'}"
+                                        <Label Text="{Binding AtUtc.LocalDateTime, StringFormat='{0:MMM d, h:mm tt}'}"
                                                FontSize="10"
                                                TextColor="{toolkit:AppThemeResource OnSurfaceVariant}"/>
                                     </VerticalStackLayout>
