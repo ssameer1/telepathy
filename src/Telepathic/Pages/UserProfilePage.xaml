@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pageModels="clr-namespace:Telepathic.PageModels"
+             xmlns:models="clr-namespace:Telepathic.Models"
+             xmlns:sf="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="Telepathic.Pages.UserProfilePage"
+             x:DataType="pageModels:UserProfilePageModel"
+             Title="Profile">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24"
+                             Spacing="24">
+            
+            <Label Text="⚙️ Settings"
+                   FontAttributes="Bold"
+                   FontSize="28"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,12"/>
+
+            <!-- Telepathy Toggle -->
+            <sf:SfTextInputLayout IsHintAlwaysFloated="True"
+                                  Hint="Enable Telepathy"
+                                  Padding="8">
+                <Switch IsToggled="{Binding IsTelepathyEnabled, Mode=TwoWay}"
+                        OnColor="{toolkit:AppThemeResource Primary}"/>
+            </sf:SfTextInputLayout>
+
+            <!-- Location Services -->
+            <sf:SfTextInputLayout IsHintAlwaysFloated="True"
+                                  Hint="Enable Location Services"
+                                  Padding="8">
+                <VerticalStackLayout Spacing="8">
+                    <Switch IsToggled="{Binding IsLocationEnabled, Mode=TwoWay}"
+                            OnColor="{toolkit:AppThemeResource Primary}"/>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          IsVisible="{Binding IsLocationEnabled}">
+                        <Label Text="{Binding CurrentLocation}"
+                               VerticalOptions="Center"
+                               Margin="0,8,0,0"/>
+
+                        <Button Grid.Column="1"
+                                Text="Refresh"
+                                Command="{Binding RefreshLocationCommand}"
+                                IsVisible="{Binding IsLocationEnabled}"
+                                IsEnabled="{Binding IsGettingLocation, Converter={StaticResource InvertedBoolConverter}}"
+                                Margin="8,0,0,0"/>
+                    </Grid>
+
+                    <ActivityIndicator IsRunning="{Binding IsGettingLocation}"
+                                       IsVisible="{Binding IsGettingLocation}"
+                                       HorizontalOptions="Start"/>
+                </VerticalStackLayout>
+            </sf:SfTextInputLayout>
+
+            <!-- Foundry Endpoint -->
+            <sf:SfTextInputLayout Hint="Foundry Endpoint">
+                <Entry Text="{Binding FoundryEndpoint, Mode=TwoWay}"
+                       Placeholder="Enter Endpoint"/>
+            </sf:SfTextInputLayout>
+
+            <!-- Foundry API Key -->
+            <sf:SfTextInputLayout Hint="Foundry API Key">
+                <Entry Text="{Binding FoundryApiKey, Mode=TwoWay}"
+                       Placeholder="Enter API Key"
+                       IsPassword="True"/>
+            </sf:SfTextInputLayout>
+
+            <!-- Google Places API Key -->
+            <sf:SfTextInputLayout Hint="Google Places API Key">
+                <Entry Text="{Binding GooglePlacesApiKey, Mode=TwoWay}"
+                       Placeholder="Enter Google Places API Key"
+                       IsPassword="True"/>
+            </sf:SfTextInputLayout>
+
+            <!-- Calendar Selection -->
+            <sf:SfTextInputLayout IsHintAlwaysFloated="True"
+                                  Hint="Calendar(s)"
+                                  Padding="8">
+                <VerticalStackLayout Spacing="10">
+                    <ActivityIndicator IsRunning="{Binding IsLoadingCalendars}"
+                                       IsVisible="{Binding IsLoadingCalendars}"
+                                       HorizontalOptions="Start"/>
+
+                    <VerticalStackLayout
+                        Spacing="10"
+                        IsVisible="{Binding HasLoadedCalendars}"
+                        Padding="8"
+                        BindableLayout.ItemsSource="{Binding UserCalendars}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:CalendarInfo">
+                                <Grid ColumnDefinitions="*, Auto"
+                                      Padding="0,5">
+                                    <Label Text="{Binding Name}"
+                                           VerticalOptions="Center"/>
+                                    <CheckBox Grid.Column="1"
+                                              IsChecked="{Binding IsSelected}"
+                                              Color="{toolkit:AppThemeResource Primary}"
+                                              CheckedChanged="CalendarCheckBox_CheckedChanged"/>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Button
+                        Text="{Binding CalendarButtonText}"
+                        Command="{Binding ToggleCalendarCommand}"
+                        HorizontalOptions="Start"/>
+                </VerticalStackLayout>
+            </sf:SfTextInputLayout>
+
+            <!-- About Me / Personalization -->
+            <sf:SfTextInputLayout Hint="Personalization">
+                <Editor Text="{Binding AboutMeText, Mode=TwoWay}"
+                        HorizontalOptions="Fill"
+                        HeightRequest="100"
+                        Placeholder="Give me details to personalize your app experience."/>
+            </sf:SfTextInputLayout>
+
+            <!-- My Data Button -->
+            <Button Text="📊 View My Data"
+                    Command="{Binding NavigateToMyDataCommand}"
+                    BackgroundColor="{toolkit:AppThemeResource Secondary}"
+                    TextColor="{toolkit:AppThemeResource OnSecondary}"
+                    Margin="0,24,0,0"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

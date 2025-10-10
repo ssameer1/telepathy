@@ -18,6 +18,11 @@ public interface IUserMemoryStore
     Task<List<MemoryEvent>> GetRecentEventsAsync(string userId, int count = 20);
 
     /// <summary>
+    /// Gets all events for a user
+    /// </summary>
+    Task<List<MemoryEvent>> GetEventsAsync(string userId);
+
+    /// <summary>
     /// Gets total event count for a user
     /// </summary>
     Task<int> GetEventCountAsync(string userId);
@@ -94,6 +99,21 @@ public interface IUserMemoryStore
     /// Wipes all memory data for a user (Forget Me)
     /// </summary>
     Task ForgetUserAsync(string userId);
+
+    /// <summary>
+    /// Deletes all events for a user
+    /// </summary>
+    Task DeleteAllEventsAsync(string userId);
+
+    /// <summary>
+    /// Deletes all facts for a user
+    /// </summary>
+    Task DeleteAllFactsAsync(string userId);
+
+    /// <summary>
+    /// Deletes snapshot for a user
+    /// </summary>
+    Task DeleteSnapshotAsync(string userId);
 
     /// <summary>
     /// Gets memory statistics

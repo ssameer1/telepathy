@@ -70,6 +70,12 @@
                          Color="{toolkit:AppThemeResource OnBackground}"
                          Size="{StaticResource IconSize}"/>
 
+        <FontImageSource x:Key="IconSettings"
+                         Glyph="{x:Static f:FluentUI.settings_24_regular}"
+                         FontFamily="{x:Static f:FluentUI.FontFamily}"
+                         Color="{toolkit:AppThemeResource OnBackground}"
+                         Size="{StaticResource IconSize}"/>
+
         <FontImageSource x:Key="IconRibbon"
                          Glyph="{x:Static f:FluentUI.ribbon_20_regular}"
                          FontFamily="{x:Static f:FluentUI.FontFamily}"

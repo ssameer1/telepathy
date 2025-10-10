@@ -697,6 +697,118 @@ public class SqliteUserMemoryStore : IUserMemoryStore
         _logger.LogInformation("Maintenance complete for user {UserId}", userId);
     }
 
+    public async Task<List<MemoryEvent>> GetEventsAsync(string userId)
+    {
+        await InitAsync();
+
+        var events = new List<MemoryEvent>();
+
+        try
+        {
+            await using var connection = new SqliteConnection(MemoryConstants.DatabasePath);
+            await connection.OpenAsync();
+
+            var selectCmd = connection.CreateCommand();
+            selectCmd.CommandText = @"
+                SELECT Id, UserId, Type, Topic, MetaJson, Weight, AtUtc
+                FROM Events
+                WHERE UserId = @userId
+                ORDER BY AtUtc DESC";
+
+            selectCmd.Parameters.AddWithValue("@userId", userId);
+
+            await using var reader = await selectCmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                events.Add(new MemoryEvent
+                {
+                    Id = reader.GetInt32(0),
+                    UserId = reader.GetString(1),
+                    Type = reader.GetString(2),
+                    Topic = !reader.IsDBNull(3) ? reader.GetString(3) : null,
+                    MetaJson = !reader.IsDBNull(4) ? reader.GetString(4) : null,
+                    Weight = reader.GetDouble(5),
+                    AtUtc = DateTimeOffset.Parse(reader.GetString(6))
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all events for user {UserId}", userId);
+        }
+
+        return events;
+    }
+
+    public async Task DeleteAllEventsAsync(string userId)
+    {
+        await InitAsync();
+
+        try
+        {
+            await using var connection = new SqliteConnection(MemoryConstants.DatabasePath);
+            await connection.OpenAsync();
+
+            var deleteCmd = connection.CreateCommand();
+            deleteCmd.CommandText = "DELETE FROM Events WHERE UserId = @userId";
+            deleteCmd.Parameters.AddWithValue("@userId", userId);
+            await deleteCmd.ExecuteNonQueryAsync();
+
+            _logger.LogWarning("Deleted all events for user {UserId}", userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting events for user {UserId}", userId);
+            throw;
+        }
+    }
+
+    public async Task DeleteAllFactsAsync(string userId)
+    {
+        await InitAsync();
+
+        try
+        {
+            await using var connection = new SqliteConnection(MemoryConstants.DatabasePath);
+            await connection.OpenAsync();
+
+            var deleteCmd = connection.CreateCommand();
+            deleteCmd.CommandText = "DELETE FROM Facts WHERE UserId = @userId";
+            deleteCmd.Parameters.AddWithValue("@userId", userId);
+            await deleteCmd.ExecuteNonQueryAsync();
+
+            _logger.LogWarning("Deleted all facts for user {UserId}", userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting facts for user {UserId}", userId);
+            throw;
+        }
+    }
+
+    public async Task DeleteSnapshotAsync(string userId)
+    {
+        await InitAsync();
+
+        try
+        {
+            await using var connection = new SqliteConnection(MemoryConstants.DatabasePath);
+            await connection.OpenAsync();
+
+            var deleteCmd = connection.CreateCommand();
+            deleteCmd.CommandText = "DELETE FROM Snapshot WHERE UserId = @userId";
+            deleteCmd.Parameters.AddWithValue("@userId", userId);
+            await deleteCmd.ExecuteNonQueryAsync();
+
+            _logger.LogInformation("Deleted snapshot for user {UserId}", userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting snapshot for user {UserId}", userId);
+            throw;
+        }
+    }
+
     public async Task ForgetUserAsync(string userId)
     {
         await InitAsync();

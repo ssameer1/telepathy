@@ -28,6 +28,12 @@
         Route="manage" />
 
     <ShellContent
+        Title="Profile"
+        Icon="{StaticResource IconSettings}"
+        ContentTemplate="{DataTemplate pages:UserProfilePage}"
+        Route="profile" />
+
+    <ShellContent
         Title="🧠 Memory Debug"
         ContentTemplate="{DataTemplate pages:MemoryDebugPage}"
         Route="memory-debug" />
