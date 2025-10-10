@@ -17,13 +17,20 @@ public interface IChatClientService
     /// <returns>The current IChatClient instance</returns>
     /// <exception cref="InvalidOperationException">Thrown when the chat client has not been initialized</exception>
     IChatClient GetClient();
-    
+
+    /// <summary>
+    /// Gets the underlying Azure OpenAI client for advanced operations like audio transcription
+    /// </summary>
+    /// <returns>The AzureOpenAIClient instance</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the client has not been initialized or is not an AzureOpenAIClient</exception>
+    AzureOpenAIClient GetAzureOpenAIClient();
+
     /// <summary>
     /// Gets the MCP tools that can be used with the chat client
     /// </summary>
     /// <returns>A list of available MCP tools</returns>
     Task<IList<object>> GetMcpToolsAsync();
-    
+
     /// <summary>
     /// Gets a response from the chat client with MCP tools included
     /// </summary>
@@ -31,14 +38,14 @@ public interface IChatClientService
     /// <param name="prompt">The prompt to send to the chat client</param>
     /// <returns>The chat response</returns>
     Task<ChatResponse<T>> GetResponseWithToolsAsync<T>(string prompt);
-    
+
     /// <summary>
     /// Updates the chat client with a new API key
     /// </summary>
     /// <param name="apiKey">The OpenAI API key</param>
     /// <param name="model">The model to use (defaults to gpt-4o-mini)</param>
     void UpdateClient(string apiKey, string model = "gpt-4o-mini");
-    
+
     /// <summary>
     /// Updates the chat client with provider-specific settings
     /// </summary>
@@ -47,7 +54,7 @@ public interface IChatClientService
     /// <param name="endpoint">The endpoint URL (required for foundry, optional for others)</param>
     /// <param name="model">The model to use</param>
     void UpdateClient(string apiKey, string provider, string? endpoint = null, string model = "gpt-4o-mini");
-    
+
     /// <summary>
     /// Checks if the client is initialized and ready to use
     /// </summary>
@@ -60,6 +67,7 @@ public interface IChatClientService
 public class ChatClientService : IChatClientService
 {
     private IChatClient? _chatClient;
+    private AzureOpenAIClient? _azureOpenAIClient;
     private readonly ILogger _logger;
     private readonly LocationTools _locationTools;
     private IList<object>? _cachedTools;
@@ -68,13 +76,13 @@ public class ChatClientService : IChatClientService
     {
         _logger = logger;
         _locationTools = locationTools;
-        
+
         // Try to initialize from preferences if available
         // Check for Foundry settings first (higher priority if both are configured)
         var foundryEndpoint = Preferences.Default.Get("foundry_endpoint", string.Empty);
         var foundryApiKey = Preferences.Default.Get("foundry_api_key", string.Empty);
         var openAiApiKey = Preferences.Default.Get("openai_api_key", string.Empty);
-        
+
         if (!string.IsNullOrEmpty(foundryEndpoint) && !string.IsNullOrEmpty(foundryApiKey))
         {
             UpdateClient(foundryApiKey, "foundry", foundryEndpoint);
@@ -90,8 +98,13 @@ public class ChatClientService : IChatClientService
         return _chatClient ?? throw new InvalidOperationException("Chat client has not been initialized. Please provide an API key first.");
     }
 
+    public AzureOpenAIClient GetAzureOpenAIClient()
+    {
+        return _azureOpenAIClient ?? throw new InvalidOperationException("Azure OpenAI client has not been initialized. Please ensure you are using the Foundry provider.");
+    }
+
     public bool IsInitialized => _chatClient != null;
-    
+
     /// <summary>
     /// Gets the available MCP tools that can be used with the chat client
     /// </summary>
@@ -101,7 +114,7 @@ public class ChatClientService : IChatClientService
         {
             return Task.FromResult(_cachedTools);
         }
-        
+
         try
         {
             // Directly use LocationTools without going through McpService
@@ -114,7 +127,7 @@ public class ChatClientService : IChatClientService
             return Task.FromResult<IList<object>>(new List<object>());
         }
     }
-    
+
     /// <summary>
     /// Gets a response from the chat client with MCP tools included
     /// </summary>
@@ -122,13 +135,13 @@ public class ChatClientService : IChatClientService
     {
         var client = GetClient();
         var tools = await GetMcpToolsAsync();
-        
+
         // Create chat options with tools included
         var options = new ChatOptions();
-        
+
         // Don't use the tools directly - instead let MCP system handle registration
         // The LocationTools is already registered with the MCP server
-        
+
         _logger.LogInformation("Calling chat client with location tools available");
         return await client.GetResponseAsync<T>(prompt, options);
     }
@@ -156,11 +169,11 @@ public class ChatClientService : IChatClientService
             })
             .UseFunctionInvocation()
             .Build();
-            
-            
+
+
             // Clear cached tools when client is updated
             _cachedTools = null;
-            
+
             _logger.LogInformation("Chat client successfully initialized with model: {Model}", model);
         }
         catch (Exception ex)
@@ -190,13 +203,13 @@ public class ChatClientService : IChatClientService
                         throw new ArgumentException("Foundry provider requires an endpoint URL", nameof(endpoint));
                     }
                     _logger.LogInformation("Initializing Foundry chat client with endpoint: {Endpoint}", endpoint);
-                    
+
                     // For Foundry, create OpenAI client that points to the Foundry endpoint
                     // Most Foundry services are OpenAI-compatible
-                    var foundryClient = new AzureOpenAIClient(new Uri(endpoint),new System.ClientModel.ApiKeyCredential(apiKey));
-                    _chatClient = foundryClient.GetChatClient("gpt-4o").AsIChatClient();
+                    _azureOpenAIClient = new AzureOpenAIClient(new Uri(endpoint), new System.ClientModel.ApiKeyCredential(apiKey));
+                    _chatClient = _azureOpenAIClient.GetChatClient("gpt-5-mini").AsIChatClient();
                     break;
-                    
+
                 case "openai":
                 default:
                     // Use OpenAI client (existing logic)
@@ -215,10 +228,10 @@ public class ChatClientService : IChatClientService
             })
             .UseFunctionInvocation()
             .Build();
-            
+
             // Clear cached tools when client is updated
             _cachedTools = null;
-            
+
             _logger.LogInformation("Chat client successfully initialized with provider: {Provider}, model: {Model}", provider, model);
         }
         catch (Exception ex)

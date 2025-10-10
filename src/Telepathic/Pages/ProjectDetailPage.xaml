@@ -13,6 +13,7 @@
              x:Class="Telepathic.Pages.ProjectDetailPage"
              x:DataType="pageModels:ProjectDetailPageModel"
              SafeAreaEdges="None"
+             x:Name="ThisPage"
              Title="Project">
 
     <ContentPage.Resources>
@@ -100,6 +101,7 @@
                         Text="{Binding Name}">
                         <Entry.Behaviors>
                             <toolkit:EventToCommandBehavior EventName="Unfocused"
+                                                            BindingContext="{Binding Path=BindingContext, Source={x:Reference ThisPage}, x:DataType=ContentPage}"
                                                             Command="{Binding NameUnfocusedCommand}"/>
                         </Entry.Behaviors>
                     </Entry>

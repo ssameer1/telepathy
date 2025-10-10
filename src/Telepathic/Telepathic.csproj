@@ -44,10 +44,10 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
-	<!-- <PropertyGroup>
+	<PropertyGroup>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
-	</PropertyGroup> -->
+	</PropertyGroup>
 
 	<!-- Enable XAML simplifications - results in red squiggles but works -->
 	<!-- <PropertyGroup>

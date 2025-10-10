@@ -72,122 +72,119 @@
     </Shell.TitleView>
 
     <Grid SafeAreaEdges="None">
-        <pullToRefresh:SfPullToRefresh
-            IsRefreshing="{Binding IsRefreshing}"
-            RefreshCommand="{Binding RefreshCommand}">
-            <pullToRefresh:SfPullToRefresh.PullableContent>
-                <ScrollView x:Name="ScrollView">
-                    <!-- <VisualElement.Behaviors>
+        <ScrollView x:Name="ScrollView"
+                    SafeAreaEdges="None">
+            <!-- <VisualElement.Behaviors>
                         <aloha:ScrollViewScrollBehavior x:Name="ScrollBehavior"/>
                     </VisualElement.Behaviors> -->
-                    <VerticalStackLayout
-                        x:Name="ScrollContent"
-                        Spacing="{StaticResource LayoutSpacing}"
-                        Padding="{StaticResource LayoutPadding}">
+            <VerticalStackLayout
+                x:Name="ScrollContent"
+                Spacing="{StaticResource LayoutSpacing}"
+                Padding="{StaticResource LayoutPadding}">
 
-                        <!-- <Button Text="Force" Command="{Binding ForcePriorityTaskRefreshCommand}"/> -->
+                <!-- <Button Text="Force" Command="{Binding ForcePriorityTaskRefreshCommand}"/> -->
 
-                        <!-- Activity Indicator for telepathic analysis -->
-                        <controls:ActivityIndicatorView
-                            IsVisible="{Binding IsAnalyzingContext}"
-                            IsRunning="{Binding IsAnalyzingContext}"
-                            HorizontalOptions="Start"
-                            Title="{Binding AnalysisStatusTitle}"
-                            Detail="{Binding AnalysisStatusDetail}"
-                            MinimumWidthRequest="200"
-                            MinimumHeightRequest="100"
-                            ShimmerStartColor="#4a90e2"
-                            ShimmerEndColor="#9b59b6"/>
-                        <!-- Priority Tasks Section -->
-                        <VerticalStackLayout
-                            IsVisible="{Binding ShouldShowPriorityTasks}"
-                            Spacing="{StaticResource LayoutSpacing}"
-                            Margin="0,0,0,12">
-                            <Label Text="{Binding PersonalizedGreeting}"
-                                   Style="{StaticResource Title2}"
-                                   TextColor="{toolkit:AppThemeResource Tertiary}"/>
-                            <cards:SfCardLayout
-                                BindableLayout.ItemsSource="{Binding PriorityTasks}"
-                                VerticalOptions="Center"
-                                SwipeDirection="Left"
-                                HeightRequest="200"
-                                BackgroundColor="Transparent">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate>
-                                        <cards:SfCardView
-                                            x:DataType="viewModels:ProjectTaskViewModel"
-                                            BackgroundColor="Transparent"
-                                            BorderWidth="0"
-                                            FadeOutOnSwiping="True">
-                                            <Border
-                                                StrokeThickness="1"
-                                                Stroke="{toolkit:AppThemeResource Surface1}"
-                                                StrokeShape="RoundRectangle 20"
-                                                BackgroundColor="{toolkit:AppThemeResource Surface0}"
-                                                InputTransparent="False">
-                                                <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer
-                                                        Command="{Binding NavigateToTaskCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}},x:DataType=pageModels:MainPageModel}"
-                                                        CommandParameter="{Binding Task}"/>
-                                                </Border.GestureRecognizers>
-                                                <!-- <effectsView:SfEffectsView
+                <!-- Activity Indicator for telepathic analysis -->
+                <controls:ActivityIndicatorView
+                    IsVisible="{Binding IsAnalyzingContext}"
+                    IsRunning="{Binding IsAnalyzingContext}"
+                    HorizontalOptions="Start"
+                    Title="{Binding AnalysisStatusTitle}"
+                    Detail="{Binding AnalysisStatusDetail}"
+                    MinimumWidthRequest="200"
+                    MinimumHeightRequest="100"
+                    ShimmerStartColor="#4a90e2"
+                    ShimmerEndColor="#9b59b6"/>
+                <!-- Priority Tasks Section -->
+                <VerticalStackLayout
+                    IsVisible="{Binding ShouldShowPriorityTasks}"
+                    Spacing="{StaticResource LayoutSpacing}"
+                    Margin="0,0,0,12">
+                    <Label Text="{Binding PersonalizedGreeting}"
+                           Style="{StaticResource Title2}"
+                           TextColor="{toolkit:AppThemeResource Tertiary}"/>
+                    <cards:SfCardLayout
+                        BindableLayout.ItemsSource="{Binding PriorityTasks}"
+                        VerticalOptions="Center"
+                        SwipeDirection="Left"
+                        HeightRequest="200"
+                        BackgroundColor="Transparent">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <cards:SfCardView
+                                    x:DataType="viewModels:ProjectTaskViewModel"
+                                    BackgroundColor="Transparent"
+                                    BorderWidth="0"
+                                    FadeOutOnSwiping="True">
+                                    <Border
+                                        StrokeThickness="1"
+                                        Stroke="{toolkit:AppThemeResource Surface1}"
+                                        StrokeShape="RoundRectangle 20"
+                                        BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                                        InputTransparent="False">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding NavigateToTaskCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}},x:DataType=pageModels:MainPageModel}"
+                                                CommandParameter="{Binding Task}"/>
+                                        </Border.GestureRecognizers>
+                                        <!-- <effectsView:SfEffectsView
                                                         TouchDownEffects="Highlight"
                                                         HighlightBackground="{toolkit:AppThemeResource OnBackground}"> -->
-                                                <Grid RowDefinitions="*"
-                                                      ColumnDefinitions="*"
-                                                      IsClippedToBounds="True">
-                                                    <!-- Checkbox in the upper left -->
-                                                    <Grid ColumnSpacing="15"
-                                                          ColumnDefinitions="Auto, *"
-                                                          VerticalOptions="Start"
-                                                          HorizontalOptions="Start"
-                                                          IsVisible="{Binding IsShowingReasoning,Converter={StaticResource InvertedBoolConverter}}">
-                                                        <CheckBox
-                                                            Grid.Row="0"
-                                                            Grid.Column="0"
-                                                            VerticalOptions="Center"
-                                                            IsChecked="{Binding IsCompleted}"
-                                                            Color="{toolkit:AppThemeResource Primary}"
-                                                            CheckedChanged="PriorityTask_CheckedChanged"/>
-                                                        <Label Text="{Binding Title}"
-                                                               VerticalOptions="Center"
-                                                               LineBreakMode="WordWrap"
-                                                               MaxLines="3"
-                                                               HorizontalOptions="Start"
-                                                               Grid.Column="1"
-                                                               TextColor="{toolkit:AppThemeResource OnBackground}"/>
-                                                    </Grid>
+                                        <Grid RowDefinitions="*"
+                                              ColumnDefinitions="*"
+                                              IsClippedToBounds="True">
+                                            <!-- Checkbox in the upper left -->
+                                            <Grid ColumnSpacing="15"
+                                                  ColumnDefinitions="Auto, *"
+                                                  VerticalOptions="Start"
+                                                  HorizontalOptions="Start"
+                                                  IsVisible="{Binding IsShowingReasoning,Converter={StaticResource InvertedBoolConverter}}">
+                                                <CheckBox
+                                                    Grid.Row="0"
+                                                    Grid.Column="0"
+                                                    VerticalOptions="Center"
+                                                    IsChecked="{Binding IsCompleted}"
+                                                    Color="{toolkit:AppThemeResource Primary}"
+                                                    CheckedChanged="PriorityTask_CheckedChanged"/>
+                                                <Label Text="{Binding Title}"
+                                                       VerticalOptions="Center"
+                                                       LineBreakMode="WordWrap"
+                                                       MaxLines="3"
+                                                       HorizontalOptions="Start"
+                                                       Grid.Column="1"
+                                                       TextColor="{toolkit:AppThemeResource OnBackground}"/>
+                                            </Grid>
 
-                                                    <!-- Priority Reasoning (replaces title when visible) -->
-                                                    <Label Text="{Binding PriorityReasoning}"
-                                                           Style="{StaticResource Body1}"
-                                                           FontAttributes="Italic"
-                                                           LineBreakMode="WordWrap"
-                                                           VerticalOptions="Start"
-                                                           IsVisible="{Binding IsShowingReasoning}"
-                                                           TextColor="{toolkit:AppThemeResource OnBackground}"/>
+                                            <!-- Priority Reasoning (replaces title when visible) -->
+                                            <Label Text="{Binding PriorityReasoning}"
+                                                   Style="{StaticResource Body1}"
+                                                   FontAttributes="Italic"
+                                                   LineBreakMode="WordWrap"
+                                                   VerticalOptions="Start"
+                                                   IsVisible="{Binding IsShowingReasoning}"
+                                                   TextColor="{toolkit:AppThemeResource OnBackground}"/>
 
-                                                    <HorizontalStackLayout Spacing="{StaticResource size160}"
-                                                                           HorizontalOptions="End"
-                                                                           VerticalOptions="End"
-                                                                           IsClippedToBounds="True">
-                                                        <ImageButton Source="{StaticResource IconInsights}"
-                                                                     Aspect="Center"
-                                                                     HeightRequest="44"
-                                                                     WidthRequest="44"
-                                                                     BackgroundColor="Transparent"
-                                                                     Command="{Binding ToggleShowReasoningCommand}"/>
+                                            <HorizontalStackLayout Spacing="{StaticResource size160}"
+                                                                   HorizontalOptions="End"
+                                                                   VerticalOptions="End"
+                                                                   IsClippedToBounds="True">
+                                                <ImageButton Source="{StaticResource IconInsights}"
+                                                             Aspect="Center"
+                                                             HeightRequest="44"
+                                                             WidthRequest="44"
+                                                             BackgroundColor="Transparent"
+                                                             Command="{Binding ToggleShowReasoningCommand}"/>
 
-                                                        <ImageButton Source="{StaticResource IconAssist}"
-                                                                     IsVisible="{Binding Task.AssistType, Converter={StaticResource AssistTypeToBoolConverter}}"
-                                                                     Aspect="Center"
-                                                                     HeightRequest="44"
-                                                                     WidthRequest="44"
-                                                                     BackgroundColor="Transparent"
-                                                                     Command="{Binding AssistCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"
-                                                                     CommandParameter="{Binding Task}"/>
+                                                <ImageButton Source="{StaticResource IconAssist}"
+                                                             IsVisible="{Binding Task.AssistType, Converter={StaticResource AssistTypeToBoolConverter}}"
+                                                             Aspect="Center"
+                                                             HeightRequest="44"
+                                                             WidthRequest="44"
+                                                             BackgroundColor="Transparent"
+                                                             Command="{Binding AssistCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"
+                                                             CommandParameter="{Binding Task}"/>
 
-                                                        <!-- <ImageButton Source="{StaticResource IconAssist}"
+                                                <!-- <ImageButton Source="{StaticResource IconAssist}"
                                                                         IsVisible="{Binding AssistType, Converter={StaticResource AssistTypeToBoolConverter}}"
                                                                         Aspect="Center"
                                                                         HeightRequest="44"
@@ -195,79 +192,77 @@
                                                                         BackgroundColor="Transparent"
                                                                         Command="{Binding CheckIsNearbyCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"
                                                                         CommandParameter="{Binding .}"/> -->
-                                                    </HorizontalStackLayout>
+                                            </HorizontalStackLayout>
 
 
-                                                    <!-- Project Name in the lower left -->
-                                                    <Label
-                                                        Text="{Binding ProjectName, FallbackValue='Project'}"
-                                                        Style="{StaticResource Body2}"
-                                                        LineBreakMode="TailTruncation"
-                                                        MaximumWidthRequest="{OnIdiom Phone=180, Tablet=400}"
-                                                        HorizontalOptions="Start"
-                                                        VerticalOptions="End"
-                                                        TextColor="{toolkit:AppThemeResource Tertiary}"/>
-                                                </Grid>
-                                                <!-- </effectsView:SfEffectsView> -->
-                                            </Border>
-                                        </cards:SfCardView>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </cards:SfCardLayout>
-                        </VerticalStackLayout>
+                                            <!-- Project Name in the lower left -->
+                                            <Label
+                                                Text="{Binding ProjectName, FallbackValue='Project'}"
+                                                Style="{StaticResource Body2}"
+                                                LineBreakMode="TailTruncation"
+                                                MaximumWidthRequest="{OnIdiom Phone=180, Tablet=400}"
+                                                HorizontalOptions="Start"
+                                                VerticalOptions="End"
+                                                TextColor="{toolkit:AppThemeResource Tertiary}"/>
+                                        </Grid>
+                                        <!-- </effectsView:SfEffectsView> -->
+                                    </Border>
+                                </cards:SfCardView>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </cards:SfCardLayout>
+                </VerticalStackLayout>
 
-                        <controls:CategoryChart/>
+                <controls:CategoryChart/>
 
-                        <Label Text="Projects"
-                               Style="{StaticResource Title2}"/>
+                <Label Text="Projects"
+                       Style="{StaticResource Title2}"/>
 
-                        <ScrollView Orientation="Horizontal"
-                                    Margin="-30,0">
-                            <HorizontalStackLayout
-                                Spacing="15"
-                                Padding="30,0"
-                                BindableLayout.ItemsSource="{Binding Projects}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:Project">
-                                        <controls:ProjectCardView WidthRequest="200">
-                                            <controls:ProjectCardView.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding NavigateToProjectCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"
-                                                                      CommandParameter="{Binding .}"/>
-                                            </controls:ProjectCardView.GestureRecognizers>
-                                        </controls:ProjectCardView>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </HorizontalStackLayout>
-                        </ScrollView>
-
-                        <Grid HeightRequest="44">
-                            <Label Text="Tasks"
-                                   Style="{StaticResource Title2}"
-                                   VerticalOptions="Center"/>
-
-                            <ImageButton
-                                Source="{StaticResource IconClean}"
-                                HorizontalOptions="End"
-                                VerticalOptions="Center"
-                                Aspect="Center"
-                                HeightRequest="44"
-                                WidthRequest="44"
-                                IsVisible="{Binding HasCompletedTasks}"
-                                Command="{Binding CleanTasksCommand}"/>
-                        </Grid>
-
-                        <VerticalStackLayout Spacing="15"
-                                             BindableLayout.ItemsSource="{Binding Tasks}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate>
-                                    <controls:TaskView TaskCompletedCommand="{Binding CompletedCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"/>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
-                    </VerticalStackLayout>
+                <ScrollView Orientation="Horizontal"
+                            Margin="-30,0">
+                    <HorizontalStackLayout
+                        Spacing="15"
+                        Padding="30,0"
+                        BindableLayout.ItemsSource="{Binding Projects}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:Project">
+                                <controls:ProjectCardView WidthRequest="200">
+                                    <controls:ProjectCardView.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding NavigateToProjectCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"
+                                                              CommandParameter="{Binding .}"/>
+                                    </controls:ProjectCardView.GestureRecognizers>
+                                </controls:ProjectCardView>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
                 </ScrollView>
-            </pullToRefresh:SfPullToRefresh.PullableContent>
-        </pullToRefresh:SfPullToRefresh>
+
+                <Grid HeightRequest="44">
+                    <Label Text="Tasks"
+                           Style="{StaticResource Title2}"
+                           VerticalOptions="Center"/>
+
+                    <ImageButton
+                        Source="{StaticResource IconClean}"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center"
+                        Aspect="Center"
+                        HeightRequest="44"
+                        WidthRequest="44"
+                        IsVisible="{Binding HasCompletedTasks}"
+                        Command="{Binding CleanTasksCommand}"/>
+                </Grid>
+
+                <VerticalStackLayout Spacing="15"
+                                     BindableLayout.ItemsSource="{Binding Tasks}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <controls:TaskView TaskCompletedCommand="{Binding CompletedCommand, Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, x:DataType=pageModels:MainPageModel}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
 
         <!-- <VerticalStackLayout
             IsVisible="False"
@@ -421,10 +416,15 @@
                             </VerticalStackLayout>
                         </sf:SfTextInputLayout>
 
+                        <sf:SfTextInputLayout
+                            Hint="Foundry Endpoint">
+                            <Entry Text="{Binding FoundryEndpoint, Mode=TwoWay}"
+                                   Placeholder="Enter Endpoint"/>
+                        </sf:SfTextInputLayout>
 
                         <sf:SfTextInputLayout
-                            Hint="OpenAI API Key">
-                            <Entry Text="{Binding OpenAIApiKey, Mode=TwoWay}"
+                            Hint="Foundry API Key">
+                            <Entry Text="{Binding FoundryApiKey, Mode=TwoWay}"
                                    Placeholder="Enter API Key"
                                    IsPassword="True"/>
                         </sf:SfTextInputLayout>
