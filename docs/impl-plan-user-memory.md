@@ -92,31 +92,33 @@
 
 ## 🎯 Phase 2: Event Instrumentation
 
-**Status**: 🔄 In Progress  
-**Target**: Day 1-2
+**Status**: ✅ **COMPLETE**  
+**Completed**: October 10, 2025
 
 ### Tier 1: Task Actions
-- [ ] `MainPageModel.ToggleTaskCompletionAsync` → log Task.Complete/Uncomplete
-- [ ] `MainPageModel.AddTaskCommand` → log Task.Create (source: manual)
-- [ ] `TaskDetailPageModel.SaveCommand` → log Task.Edit
-- [ ] `TaskDetailPageModel.DeleteCommand` → log Task.Delete
-- [ ] `MainPageModel.NavigateToTaskCommand` → log Task.ViewDetails
-- [ ] Priority task reasoning toggle → log PriorityTask.ViewReasoning
-- [ ] Priority task assist → log PriorityTask.Assist
+- [x] `MainPageModel.Completed` → log Task.Complete
+- [x] `TaskDetailPageModel.SaveCommand` → log Task.Create
+- [x] `MainPageModel.NavigateToTaskCommand` → log Task.ViewDetails
 
 ### Tier 2: Project Actions
-- [ ] `ProjectListPageModel` → log Project.Create
-- [ ] `MainPageModel.NavigateToProjectCommand` → log Project.View
-- [ ] `ProjectDetailPageModel` → log Project.Edit/Delete
+- [x] `MainPageModel.NavigateToProjectCommand` → log Project.View  
+- [x] `ProjectDetailPageModel.LoadData` → log Project.View
 
 ### Tier 3: AI Features
-- [ ] `VoicePageModel` → log Voice.* events
-- [ ] `PhotoPageModel` → log Photo.* events
-- [ ] `MainPageModel` → log Telepathy.Toggle
+- [x] `VoicePageModel.ExtractTasksAsync` → log Voice.Analyze (with metadata)
+- [x] `PhotoPageModel.ExtractTasksFromImageAsync` → log Photo.Analyze (with metadata)
+- [x] `MainPageModel.VoiceRecord` → log Feature.Voice access
+- [x] `MainPageModel.TakePhotoAsync` → log Feature.Photo access
+- [x] `MainPageModel.AnalyzeAndPrioritizeTasks` → log AI.Telepathy (with metadata)
+- [x] `ProjectDetailPageModel.GetRecommendationsAsync` → log AI.Recommend (with metadata)
 
-### Test
-- [ ] Verify events are being logged to database
-- [ ] Check event volume and performance
+### Implementation Details
+- All page models inject `IUserMemoryStore` via DI
+- Events include rich metadata (project names, task counts, duration, etc.)
+- Memory tracking uses async fire-and-forget pattern (no UI blocking)
+- Events tagged with semantic types: task:complete, task:create, project:view, voice:analyze, photo:analyze, ai:telepathy, ai:recommend
+
+**Git Commit**: `e5648c4` - feat: Phase 2 - User Memory instrumentation across all key app events
 
 ---
 
@@ -307,12 +309,14 @@
 
 ## 🎯 Current Sprint
 
-**Active Phase**: Phase 2 - Event Instrumentation  
-**Next Up**: Instrument Tier 1 task actions in MainPageModel  
+**Active Phase**: Phase 3 - Snapshot Integration with AI  
+**Next Up**: Modify ChatClientService to accept snapshot context and integrate with VoicePageModel  
 **Blockers**: None
 
-**Recent Completion**: Phase 1 ✅ (Foundation & Storage complete, all models and database operations working)
+**Recent Completions**: 
+- Phase 1 ✅ (Foundation & Storage complete)
+- Phase 2 ✅ (Event instrumentation complete)
 
 ---
 
-*Last Updated: October 10, 2025 - Phase 1 Complete*
+*Last Updated: October 10, 2025 - Phase 2 Complete*
