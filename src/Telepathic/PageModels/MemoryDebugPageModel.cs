@@ -62,7 +62,7 @@ public partial class MemoryDebugPageModel : ObservableObject
             var events = await _memoryStore.GetRecentEventsAsync(MemoryConstants.UserId, 10);
             if (events.Any())
             {
-                EventsText = string.Join("\n\n", events.Select(e => 
+                EventsText = string.Join("\n\n", events.Select(e =>
                     $"[{e.AtUtc:HH:mm:ss}] {e.Type}\n  Topic: {e.Topic ?? "none"}\n  Weight: {e.Weight}"));
             }
             else
@@ -74,7 +74,7 @@ public partial class MemoryDebugPageModel : ObservableObject
             var facts = await _memoryStore.GetFactsAsync(MemoryConstants.UserId);
             if (facts.Any())
             {
-                FactsText = string.Join("\n\n", facts.Select(f => 
+                FactsText = string.Join("\n\n", facts.Select(f =>
                     $"{f.Key} = {f.Value}\n  Score: {f.Score:F2} | Updated: {f.UpdatedUtc:g}"));
             }
             else
@@ -113,16 +113,16 @@ public partial class MemoryDebugPageModel : ObservableObject
             // Log some test events
             await _memoryStore.LogEventAsync(MemoryEvent.Create("task:complete", "exercise", new { duration = 30 }, 1.0));
             await Task.Delay(100);
-            
+
             await _memoryStore.LogEventAsync(MemoryEvent.Create("task:complete", "email", new { count = 5 }, 1.0));
             await Task.Delay(100);
-            
+
             await _memoryStore.LogEventAsync(MemoryEvent.Create("task:create", "shopping", new { source = "manual" }, 1.0));
             await Task.Delay(100);
-            
+
             await _memoryStore.LogEventAsync(MemoryEvent.Create("project:view", "Personal", null, 1.0));
             await Task.Delay(100);
-            
+
             await _memoryStore.LogEventAsync(MemoryEvent.Create("voice:analyze", null, new { success = true }, 1.5));
 
             StatusMessage = "Test events created! Now creating facts...";

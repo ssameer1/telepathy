@@ -226,7 +226,8 @@ public partial class TaskDetailPageModel : ObservableObject, IQueryAttributable
 			await _memoryStore.LogEventAsync(MemoryEvent.Create(
 				"task:create",
 				_task.Title,
-				new { 
+				new
+				{
 					projectName = Project?.Name,
 					assistType = _task.AssistType.ToString(),
 					source = "manual"

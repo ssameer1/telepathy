@@ -13,50 +13,55 @@
         Title="Dashboard"
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate pages:MainPage}"
-        Route="main" />
+        Route="main"/>
 
     <ShellContent
         Title="Projects"
         Icon="{StaticResource IconProjects}"
         ContentTemplate="{DataTemplate pages:ProjectListPage}"
-        Route="projects" />
+        Route="projects"/>
 
     <ShellContent
         Title="Manage Meta"
         Icon="{StaticResource IconMeta}"
         ContentTemplate="{DataTemplate pages:ManageMetaPage}"
-        Route="manage" />
+        Route="manage"/>
 
     <ShellContent
         Title="Profile"
         Icon="{StaticResource IconSettings}"
         ContentTemplate="{DataTemplate pages:UserProfilePage}"
-        Route="profile" />
+        Route="profile"/>
 
     <ShellContent
         Title="🧠 Memory Debug"
         ContentTemplate="{DataTemplate pages:MemoryDebugPage}"
-        Route="memory-debug" />
+        Route="memory-debug"/>
 
     <Shell.FlyoutHeader>
-        <Grid HorizontalOptions="Fill" VerticalOptions="Start">
-            <Image Source="{AppThemeBinding Light=flyoutheader.png, Dark=flyoutheader.png}" 
-                VerticalOptions="Start" 
-                HorizontalOptions="Fill"
-                Aspect="AspectFit"  />
+        <Grid HorizontalOptions="Fill"
+                VerticalOptions="Start">
+            <Image Source="{AppThemeBinding Light=flyoutheader.png, Dark=flyoutheader.png}"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Fill"
+                   Aspect="AspectFit"/>
         </Grid>
     </Shell.FlyoutHeader>
 
     <Shell.FlyoutFooter>
         <Grid Padding="15">
-            <sf:SfSegmentedControl x:Name="ThemeSegmentedControl" 
-                VerticalOptions="Center" HorizontalOptions="Center" 
-                SelectionChanged="SfSegmentedControl_SelectionChanged"
-                SegmentWidth="40" SegmentHeight="40">                
+            <sf:SfSegmentedControl x:Name="ThemeSegmentedControl"
+                                   VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                                   SelectionChanged="SfSegmentedControl_SelectionChanged"
+                                   SegmentWidth="40"
+                    SegmentHeight="40">
                 <sf:SfSegmentedControl.ItemsSource>
                     <x:Array Type="{x:Type sf:SfSegmentItem}">
-                        <sf:SfSegmentItem ImageSource="{StaticResource IconLight}" SelectedSegmentBackground="{toolkit:AppThemeResource Quaternary}"/>
-                        <sf:SfSegmentItem ImageSource="{StaticResource IconDark}" SelectedSegmentBackground="{toolkit:AppThemeResource Tertiary}"/>
+                        <sf:SfSegmentItem ImageSource="{StaticResource IconLight}"
+                                SelectedSegmentBackground="{toolkit:AppThemeResource Quaternary}"/>
+                        <sf:SfSegmentItem ImageSource="{StaticResource IconDark}"
+                                SelectedSegmentBackground="{toolkit:AppThemeResource Tertiary}"/>
                     </x:Array>
                 </sf:SfSegmentedControl.ItemsSource>
             </sf:SfSegmentedControl>

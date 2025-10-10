@@ -46,7 +46,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
 
     // Extracted projects and tasks
     [ObservableProperty] List<Project> projects = new();
-    
+
     // Priority options for pickers
     public ObservableCollection<int?> PriorityOptions { get; } = new() { null, 1, 2, 3, 4, 5 };
 
@@ -182,12 +182,12 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
             IsAnalyzingContext = true;
             AnalysisStatusTitle = "Processing Audio";
             AnalysisStatusDetail = "Preparing your recording for transcription...";
-            
+
             // Create a temporary file path to save our recording
             string audioFilePath = Path.Combine(FileSystem.CacheDirectory, $"recording_{DateTime.Now:yyyyMMddHHmmss}.wav");
-            
+
             _logger.LogInformation("Saving audio to temporary file at {FilePath}", audioFilePath);
-            
+
             // Save the audio source to a file
             if (_audioSource != null)
             {
@@ -197,7 +197,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
                     var audioStream = _audioSource.GetAudioStream();
                     await audioStream.CopyToAsync(fileStream);
                 }
-                
+
                 _logger.LogInformation("Audio successfully saved to file");
             }
             else
@@ -205,7 +205,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
                 _logger.LogError("Audio source is null - no recording available");
                 throw new InvalidOperationException("No recording is available to transcribe");
             }
-            
+
             // Verify the file exists
             if (!File.Exists(audioFilePath))
             {
@@ -216,10 +216,10 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
             // Transcribe the audio using Whisper
             _logger.LogInformation("Starting audio transcription");
             _stopwatch.Restart();
-            
+
             AnalysisStatusTitle = "Transcribing";
             AnalysisStatusDetail = "Converting your voice to text using AI...";
-            
+
             Transcript = await _transcriber.TranscribeAsync(audioFilePath, CancellationToken.None);
             _stopwatch.Stop();
             _logger.LogInformation("Audio transcription completed in {TranscriptionDuration}ms, length: {TranscriptLength}",
@@ -227,7 +227,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
 
             AnalysisStatusTitle = "Analyzing";
             AnalysisStatusDetail = "Identifying projects and tasks from your recording...";
-            
+
             // Extract projects and tasks from the transcript
             await ExtractTasksAsync();
 
@@ -266,7 +266,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
 
             _logger.LogInformation("Starting task extraction from transcript");
             _stopwatch.Restart();
-            
+
             AnalysisStatusTitle = "Analyzing Content";
             AnalysisStatusDetail = "Using AI to identify tasks and projects in your recording...";
 
@@ -299,7 +299,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
 
             _stopwatch.Stop();
             _logger.LogInformation("Task extraction completed in {ExtractionDuration}ms", _stopwatch.ElapsedMilliseconds);
-            
+
 
             if (response?.Result != null)
             {
@@ -307,7 +307,8 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
                 await _memoryStore.LogEventAsync(MemoryEvent.Create(
                     "voice:analyze",
                     null,
-                    new { 
+                    new
+                    {
                         project_count = response.Result.Projects.Count,
                         task_count = response.Result.Projects.Sum(p => p.Tasks.Count),
                         duration_ms = _stopwatch.ElapsedMilliseconds
@@ -324,7 +325,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
                 }
 
                 Projects = response.Result.Projects;
-                
+
                 _logger.LogInformation("Found {NumberOfProjects} projects", Projects.Count);
                 _logger.LogInformation("Found {NumberOfTasks} tasks", Projects.Sum(p => p.Tasks.Count));
 
@@ -519,7 +520,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
     {
         if (task == null || task.AssistType == AssistType.None)
             return;
-            
+
         try
         {
             IsBusy = true;

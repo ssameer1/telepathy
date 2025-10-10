@@ -136,7 +136,8 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 	public bool HasCompletedTasks
 		=> Tasks?.Any(t => t.IsCompleted) ?? false;
 
-	[RelayCommand]	Task AcceptRecommendation(ProjectTask? task)
+	[RelayCommand]
+	Task AcceptRecommendation(ProjectTask? task)
 	{
 		if (task != null)
 			_logger.LogInformation("Accepting recommendation for task: {TaskTitle}", task.Title);
@@ -333,7 +334,8 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 					// Get events from the calendar for today
 					var events = await _calendarStore.GetEvents(calendar.Id, today, tomorrow);
 					results.AddRange(events);
-				}				catch (Exception ex)
+				}
+				catch (Exception ex)
 				{
 					// Log but continue with other calendars
 					_logger.LogWarning(ex, "Error getting events for calendar {CalendarName}", calendar.Name);
@@ -619,7 +621,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 	private async Task SaveApiKey()
 	{
 		_logger.LogInformation($"API Keys and settings saved");
-		
+
 		// Save all API keys and settings
 		Preferences.Default.Set("openai_api_key", OpenAIApiKey);
 		if (!string.IsNullOrWhiteSpace(FoundryEndpoint))
@@ -978,7 +980,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 			_logger.LogInformation($"AI Context: {sb.ToString()}");
 
 			AnalysisStatusDetail = "Applying futuristic intelligence to your tasks...";
-			
+
 			// Get user memory snapshot for context
 			var snapshot = await _memoryStore.GetSnapshotAsync(MemoryConstants.UserId);
 			string? userContext = null;
@@ -987,7 +989,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 				userContext = snapshot.GetFormattedText();
 				_logger.LogInformation("Including memory snapshot in telepathy analysis (version {Version})", snapshot.Version);
 			}
-			
+
 			// Send to AI for analysis with MCP tools included
 			var chatClient = _chatClientService.GetClient();
 			if (chatClient != null)
@@ -1000,7 +1002,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 					{
 						finalPrompt = $"# USER MEMORY\\n{userContext}\\n\\n{finalPrompt}";
 					}
-					
+
 					var apiResponse = await chatClient.GetResponseAsync<PriorityTaskResult>(finalPrompt);
 					if (apiResponse?.Result != null)
 					{
@@ -1008,7 +1010,8 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 						await _memoryStore.LogEventAsync(MemoryEvent.Create(
 							"ai:telepathy",
 							null,
-							new { 
+							new
+							{
 								priority_tasks_found = apiResponse.Result.PriorityTasks?.Count ?? 0,
 								has_calendar = events.Any(),
 								has_location = IsLocationEnabled
@@ -1037,8 +1040,8 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 								if (task != null)
 								{
 									task.PriorityReasoning = aiTask.PriorityReasoning;
-									task.AssistType = aiTask.AssistType;									task.AssistData = aiTask.AssistData;
-									_logger.LogDebug("Task '{TaskTitle}' prioritized because: {PriorityReasoning}, AssistType: {AssistType}, AssistData: {AssistData}", 
+									task.AssistType = aiTask.AssistType; task.AssistData = aiTask.AssistData;
+									_logger.LogDebug("Task '{TaskTitle}' prioritized because: {PriorityReasoning}, AssistType: {AssistType}, AssistData: {AssistData}",
 										task.Title, aiTask.PriorityReasoning, aiTask.AssistType, aiTask.AssistData);
 
 									var taskViewModel = new ProjectTaskViewModel(task);
@@ -1178,7 +1181,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 		if (task == null)// || string.IsNullOrWhiteSpace(task.Task.AssistData)
 			return;
 
-		
+
 		var chatClient = _chatClientService.GetClient();
 		if (chatClient != null)
 		{
@@ -1191,7 +1194,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 			sb.AppendLine($"Task: {task.Title}");
 			sb.AppendLine($"Details: {task.Task.AssistData}");
 			sb.AppendLine($"Current location: {_locationTools.GetCurrentLocation().Latitude}, {_locationTools.GetCurrentLocation().Longitude}");
-			sb.AppendLine($"IsNearby a coffee shop");			_logger.LogDebug("AI Task Analysis Prompt: {Prompt}", sb.ToString());			
+			sb.AppendLine($"IsNearby a coffee shop"); _logger.LogDebug("AI Task Analysis Prompt: {Prompt}", sb.ToString());
 
 			try
 			{
@@ -1204,7 +1207,8 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 				{
 					await AppShell.Current.DisplayAlert("Nearby Location", apiResponse.Result, "OK");
 				}
-			}catch (Exception ex)
+			}
+			catch (Exception ex)
 			{
 				_logger.LogError($"Error calling AI for task prioritization: {ex.Message}");
 			}

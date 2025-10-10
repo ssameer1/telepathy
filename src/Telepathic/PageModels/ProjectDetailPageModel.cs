@@ -130,7 +130,7 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 			IsBusy = true;
 			BusyTitle = "Getting task recommendations.";
 			BusyDetails = $"Given a project named '{projectName}', and these categories: {string.Join(", ", categoryTitles)}, looking up tasks.";
-			
+
 			// Get user memory snapshot for context
 			var snapshot = await _memoryStore.GetSnapshotAsync(MemoryConstants.UserId);
 			string? userContext = null;
@@ -138,7 +138,7 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 			{
 				userContext = snapshot.GetFormattedText();
 			}
-			
+
 			string _aboutMeText = Preferences.Default.Get("about_me_text", string.Empty);
 			var prompt = $"Given a project named '{projectName}', and these categories: {string.Join(", ", categoryTitles)}, pick the best matching category and suggest 3-7 tasks for this project. Use these details about me so the writing sounds like me: {_aboutMeText}";// Respond as JSON: {{\"category\":\"category name\",\"tasks\":[\"task1\",\"task2\"]}}
 
@@ -165,7 +165,8 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 				await _memoryStore.LogEventAsync(MemoryEvent.Create(
 					"ai:recommend",
 					projectName,
-					new { 
+					new
+					{
 						category = response.Result.Category,
 						task_count = response.Result.Tasks.Count
 					},
@@ -189,7 +190,8 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 				RecommendedTasks = recommendedTasks;
 				HasRecommendations = RecommendedTasks.Count > 0;
 			}
-		}		catch (InvalidOperationException ex)
+		}
+		catch (InvalidOperationException ex)
 		{
 			_errorHandler.HandleError(new Exception("Chat client is not initialized. Please add your OpenAI API key in settings.", ex));
 		}
@@ -399,7 +401,7 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 				task.ProjectID = _project.ID;
 				await _taskRepository.SaveItemAsync(task);
 			}
-		}		// Save any remaining recommended tasks
+		}       // Save any remaining recommended tasks
 		foreach (var recommendedTask in RecommendedTasks.Where(t => t.IsRecommendation))
 		{
 			// Once we save it as part of the project, it's no longer just a recommendation
@@ -411,7 +413,7 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 
 		// Clear recommendations since they've all been saved
 		RecommendedTasks = new List<ProjectTask>();
-		
+
 		await Shell.Current.GoToAsync("..");
 		await AppShell.DisplayToastAsync("Project saved");
 	}
@@ -460,7 +462,7 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 		{
 			IsBusy = true;
 			BusyTitle = "Performing assist action";
-			
+
 			// Use the existing TaskAssistHandler service to handle all assist action types
 			await _taskAssistHandler.HandleAssistAsync(task, false);
 		}

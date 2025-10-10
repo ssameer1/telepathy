@@ -21,6 +21,14 @@
                            Light="#FFC728"
                            Dark="#FFC728"/>
 
+    <toolkit:AppThemeColor x:Key="Error"
+                           Light="#D32F2F"
+                           Dark="#EF5350"/>
+
+    <toolkit:AppThemeColor x:Key="OnError"
+                           Light="#FFFFFF"
+                           Dark="#FFFFFF"/>
+
     <toolkit:AppThemeColor x:Key="Background"
                            Light="#F5F5F5"
                            Dark="#121212"/>
@@ -30,6 +38,10 @@
                            Dark="#FFFFFF"/>
 
     <toolkit:AppThemeColor x:Key="OnPrimary"
+                           Light="#F5F5F5"
+                           Dark="#F5F5F5"/>
+
+    <toolkit:AppThemeColor x:Key="OnSecondary"
                            Light="#F5F5F5"
                            Dark="#F5F5F5"/>
 
@@ -48,6 +60,10 @@
     <toolkit:AppThemeColor x:Key="Surface3"
                            Light="#C2C2C2"
                            Dark="#454545"/>
+
+    <toolkit:AppThemeColor x:Key="OnSurfaceVariant"
+                           Light="#404040"
+                           Dark="#ACACAC"/>
 
     <Color x:Key="White">#FFFFFF</Color>
     <Color x:Key="Black">#000000</Color>

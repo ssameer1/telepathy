@@ -20,7 +20,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="24"
                              Spacing="24">
-            
+
             <Label Text="🧠 My Memory"
                    FontAttributes="Bold"
                    FontSize="28"
@@ -37,7 +37,7 @@
                     <Label Text="📈 Statistics"
                            FontAttributes="Bold"
                            FontSize="20"/>
-                    
+
                     <Grid ColumnDefinitions="*, Auto"
                           RowDefinitions="Auto, Auto, Auto, Auto"
                           RowSpacing="8">
@@ -86,7 +86,7 @@
                     <Label Text="📸 Current Snapshot"
                            FontAttributes="Bold"
                            FontSize="20"/>
-                    
+
                     <Label Text="{Binding SnapshotText}"
                            LineBreakMode="WordWrap"
                            FontFamily="Courier"
@@ -105,7 +105,7 @@
                     <Label Text="💡 Facts"
                            FontAttributes="Bold"
                            FontSize="20"/>
-                    
+
                     <CollectionView ItemsSource="{Binding Facts}"
                                     EmptyView="No facts recorded yet.">
                         <CollectionView.ItemTemplate>
@@ -143,7 +143,7 @@
                     <Label Text="📋 Recent Events (Last 20)"
                            FontAttributes="Bold"
                            FontSize="20"/>
-                    
+
                     <CollectionView ItemsSource="{Binding RecentEvents}"
                                     EmptyView="No events recorded yet.">
                         <CollectionView.ItemTemplate>

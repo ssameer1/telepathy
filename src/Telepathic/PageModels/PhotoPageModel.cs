@@ -26,13 +26,13 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
     [ObservableProperty] private ImageSource? _imageSource;
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private PhotoPhase _phase = PhotoPhase.Analyzing;
-    
+
     // Status indicator properties
     [ObservableProperty] private bool _isAnalyzingContext = true;
     [ObservableProperty] private string _analysisStatusTitle = "Processing Photo";
     [ObservableProperty] private string _analysisStatusDetail = "Preparing to analyze your image...";
     [ObservableProperty] private string _analysisInstructions = "";
-    
+
     // Extracted projects and tasks
     [ObservableProperty] private List<Project> _projects = new();
 
@@ -58,7 +58,7 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
         _logger = logger;
         _memoryStore = memoryStore;
     }
-    
+
     [RelayCommand]
     private async Task PageAppearing()
     {
@@ -96,23 +96,23 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
             }
 
             if (result != null)
-                {
-                    // Save the file into local storage and set ImageSource
-                    ImagePath = Path.Combine(FileSystem.CacheDirectory, result.FileName);
+            {
+                // Save the file into local storage and set ImageSource
+                ImagePath = Path.Combine(FileSystem.CacheDirectory, result.FileName);
 
-                    using Stream sourceStream = await result.OpenReadAsync();
-                    using FileStream localFileStream = File.OpenWrite(ImagePath);
+                using Stream sourceStream = await result.OpenReadAsync();
+                using FileStream localFileStream = File.OpenWrite(ImagePath);
 
-                    await sourceStream.CopyToAsync(localFileStream);
-                    ImageSource = ImageSource.FromFile(ImagePath);
+                await sourceStream.CopyToAsync(localFileStream);
+                ImageSource = ImageSource.FromFile(ImagePath);
 
-                    // await AnalyzeImageAsync();
-                }
-                else
-                {
-                    // User cancelled
-                    await GoBackAsync();
-                }
+                // await AnalyzeImageAsync();
+            }
+            else
+            {
+                // User cancelled
+                await GoBackAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -154,7 +154,7 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
             IsBusy = false;
         }
     }
-    
+
     private async Task ExtractTasksFromImageAsync()
     {
         if (!_chatClientService.IsInitialized)
@@ -163,11 +163,11 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
             AnalysisStatusDetail = "Error: AI services not initialized";
             throw new InvalidOperationException("Chat client not initialized");
         }
-        
+
         try
         {
             AnalysisStatusDetail = "Extracting tasks from image content...";
-            
+
             // Get user memory snapshot for context
             var snapshot = await _memoryStore.GetSnapshotAsync(MemoryConstants.UserId);
             string? userContext = null;
@@ -176,7 +176,7 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
                 userContext = snapshot.GetFormattedText();
                 _logger.LogInformation("Including memory snapshot in photo analysis (version {Version})", snapshot.Version);
             }
-            
+
             // Build the prompt for the AI model
             var prompt = new System.Text.StringBuilder();
             prompt.AppendLine("# Image Analysis Task");
@@ -193,7 +193,7 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
             }
             prompt.AppendLine();
             prompt.AppendLine("If no projects/tasks are found, return an empty projects array.");
-            
+
             // Call the AI service with the image and user context
             var client = _chatClientService.GetClient();
             if (client == null)
@@ -202,13 +202,13 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
             }
 
             byte[] imageBytes = File.ReadAllBytes(ImagePath);
-            
+
             var msg = new Microsoft.Extensions.AI.ChatMessage(ChatRole.User,
             [
                 new TextContent(prompt.ToString()),
                 new DataContent(imageBytes, mediaType: "image/png")
             ]);
-            
+
             // Note: We can't easily inject context into ChatMessage-based calls
             // This is a limitation of the image analysis API
             // Consider adding context as a text prefix in the prompt instead
@@ -221,16 +221,16 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
                 ]);
                 _logger.LogInformation("Including user context in photo analysis prompt");
             }
-            
+
             var apiResponse = await client.GetResponseAsync<ProjectsJson>(msg);
-            
+
             if (apiResponse?.Result?.Projects != null)
             {
                 // Transform the API response into our model
                 Projects = apiResponse.Result.Projects
                     .Where(p => !string.IsNullOrWhiteSpace(p.Name))
                     .ToList();
-                
+
                 // For projects that don't have a name, add a default name
                 for (int i = 0; i < Projects.Count; i++)
                 {
@@ -240,14 +240,15 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
                     }
                 }
             }
-            
+
             if (Projects.Count > 0)
             {
                 // Track successful photo analysis
                 await _memoryStore.LogEventAsync(MemoryEvent.Create(
                     "photo:analyze",
                     null,
-                    new { 
+                    new
+                    {
                         project_count = Projects.Count,
                         task_count = Projects.Sum(p => p.Tasks.Count)
                     },
@@ -323,7 +324,7 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
     private void DeleteTask(ProjectTask? task)
     {
         if (task == null) return;
-        
+
         foreach (var project in Projects)
         {
             if (project.Tasks.Contains(task))
@@ -350,17 +351,17 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
             IsBusy = true;
             AnalysisStatusTitle = "Saving Tasks";
             AnalysisStatusDetail = "Adding your tasks to the database...";
-            
+
             int savedProjects = 0;
             int savedTasks = 0;
-            
+
             // Save each project and its tasks
             foreach (var project in Projects.Where(p => p.Tasks.Any()))
             {
                 // Save project
                 await _projectRepository.SaveItemAsync(project);
                 savedProjects++;
-                
+
                 // Save tasks
                 foreach (var task in project.Tasks)
                 {
@@ -369,10 +370,10 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
                     savedTasks++;
                 }
             }
-            
+
             // Show completion message
             await AppShell.DisplayToastAsync($"Saved {savedProjects} projects with {savedTasks} tasks!");
-            
+
             // Return to main page
             await GoBackAsync();
         }
@@ -406,7 +407,7 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
     {
         if (task == null || task.AssistType == AssistType.None)
             return;
-            
+
         try
         {
             IsBusy = true;
