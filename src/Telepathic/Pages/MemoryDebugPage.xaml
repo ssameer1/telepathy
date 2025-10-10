@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pageModels="clr-namespace:Telepathic.PageModels"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="Telepathic.Pages.MemoryDebugPage"
+             x:DataType="pageModels:MemoryDebugPageModel"
+             Title="Memory Debug">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            EventName="Appearing"
+            Command="{Binding LoadDataCommand}"/>
+    </ContentPage.Behaviors>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <!-- Status Message -->
+            <Label Text="{Binding StatusMessage}"
+                   FontAttributes="Bold"
+                   TextColor="{toolkit:AppThemeResource Primary}"
+                   HorizontalTextAlignment="Center"/>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                              IsVisible="{Binding IsBusy}"
+                              Color="{toolkit:AppThemeResource Primary}"/>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="10" RowSpacing="10">
+                <Button Text="Create Test Data"
+                        Command="{Binding CreateTestEventsCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={toolkit:InvertedBoolConverter}}"
+                        Grid.Column="0"/>
+                
+                <Button Text="Refresh Data"
+                        Command="{Binding LoadDataCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={toolkit:InvertedBoolConverter}}"
+                        Grid.Column="1"/>
+
+                <Button Text="Rebuild Snapshot"
+                        Command="{Binding RebuildSnapshotCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={toolkit:InvertedBoolConverter}}"
+                        Grid.Row="1"
+                        Grid.Column="0"/>
+
+                <Button Text="Forget Me"
+                        Command="{Binding ForgetMeCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={toolkit:InvertedBoolConverter}}"
+                        BackgroundColor="DarkRed"
+                        Grid.Row="1"
+                        Grid.Column="1"/>
+            </Grid>
+
+            <!-- Stats -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="15"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📊 Statistics"
+                           FontAttributes="Bold"
+                           FontSize="18"/>
+                    <Label Text="{Binding StatsText}"
+                           LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Snapshot -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="15"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🧠 Current Snapshot"
+                           FontAttributes="Bold"
+                           FontSize="18"/>
+                    <Label Text="{Binding SnapshotText}"
+                           FontFamily="Courier"
+                           LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Facts -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="15"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="💡 Facts"
+                           FontAttributes="Bold"
+                           FontSize="18"/>
+                    <Label Text="{Binding FactsText}"
+                           LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Recent Events -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="15"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📝 Recent Events (Last 10)"
+                           FontAttributes="Bold"
+                           FontSize="18"/>
+                    <Label Text="{Binding EventsText}"
+                           FontFamily="Courier"
+                           FontSize="12"
+                           LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

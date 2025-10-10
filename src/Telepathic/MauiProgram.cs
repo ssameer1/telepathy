@@ -67,6 +67,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<MainPageModel>();
 		builder.Services.AddSingleton<ProjectListPageModel>();
 		builder.Services.AddSingleton<ManageMetaPageModel>();
+		builder.Services.AddSingleton<MemoryDebugPageModel>();
 		builder.Services.AddSingleton<IAudioService, AudioService>();
 		builder.Services.AddSingleton<ITranscriptionService, FoundryTranscriptionService>();
 		builder.Services.AddSingleton<IChatClientService, ChatClientService>();
@@ -77,6 +78,7 @@ public static class MauiProgram
 		builder.Services.AddTransientWithShellRoute<TaskDetailPage, TaskDetailPageModel>("task");
 		builder.Services.AddTransientWithShellRoute<VoicePage, VoicePageModel>("voice");
 		builder.Services.AddTransientWithShellRoute<PhotoPage, PhotoPageModel>("photo");
+		builder.Services.AddTransientWithShellRoute<MemoryDebugPage, MemoryDebugPageModel>("memory-debug");
 
 		return builder.Build();
 	}

@@ -27,6 +27,11 @@
         ContentTemplate="{DataTemplate pages:ManageMetaPage}"
         Route="manage" />
 
+    <ShellContent
+        Title="🧠 Memory Debug"
+        ContentTemplate="{DataTemplate pages:MemoryDebugPage}"
+        Route="memory-debug" />
+
     <Shell.FlyoutHeader>
         <Grid HorizontalOptions="Fill" VerticalOptions="Start">
             <Image Source="{AppThemeBinding Light=flyoutheader.png, Dark=flyoutheader.png}" 
