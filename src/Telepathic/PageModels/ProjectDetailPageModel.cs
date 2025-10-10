@@ -131,12 +131,28 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 			BusyTitle = "Getting task recommendations.";
 			BusyDetails = $"Given a project named '{projectName}', and these categories: {string.Join(", ", categoryTitles)}, looking up tasks.";
 			
-			string _aboutMeText = Preferences.Default.Get("about_me_text", string.Empty);			var prompt = $"Given a project named '{projectName}', and these categories: {string.Join(", ", categoryTitles)}, pick the best matching category and suggest 3-7 tasks for this project. Use these details about me so the writing sounds like me: {_aboutMeText}";// Respond as JSON: {{\"category\":\"category name\",\"tasks\":[\"task1\",\"task2\"]}}
+			// Get user memory snapshot for context
+			var snapshot = await _memoryStore.GetSnapshotAsync(MemoryConstants.UserId);
+			string? userContext = null;
+			if (snapshot != null)
+			{
+				userContext = snapshot.GetFormattedText();
+			}
+			
+			string _aboutMeText = Preferences.Default.Get("about_me_text", string.Empty);
+			var prompt = $"Given a project named '{projectName}', and these categories: {string.Join(", ", categoryTitles)}, pick the best matching category and suggest 3-7 tasks for this project. Use these details about me so the writing sounds like me: {_aboutMeText}";// Respond as JSON: {{\"category\":\"category name\",\"tasks\":[\"task1\",\"task2\"]}}
 
 			await Task.Delay(2000);
 
+			// Include snapshot context by prepending it to the prompt
+			string finalPrompt = prompt;
+			if (!string.IsNullOrWhiteSpace(userContext))
+			{
+				finalPrompt = $"# USER MEMORY\n{userContext}\n\n{prompt}";
+			}
+
 			var chatClient = _chatClientService.GetClient();
-			var response = await chatClient.GetResponseAsync<RecommendationResponse>(prompt);
+			var response = await chatClient.GetResponseAsync<RecommendationResponse>(finalPrompt);
 
 			BusyDetails = "Processing the recommendations.";
 			BusyDetails = $"We have {response?.Result.Tasks.Count} tasks to recommend that we think could be amazing.";

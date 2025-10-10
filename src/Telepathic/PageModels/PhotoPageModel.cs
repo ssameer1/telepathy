@@ -168,6 +168,15 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
         {
             AnalysisStatusDetail = "Extracting tasks from image content...";
             
+            // Get user memory snapshot for context
+            var snapshot = await _memoryStore.GetSnapshotAsync(MemoryConstants.UserId);
+            string? userContext = null;
+            if (snapshot != null)
+            {
+                userContext = snapshot.GetFormattedText();
+                _logger.LogInformation("Including memory snapshot in photo analysis (version {Version})", snapshot.Version);
+            }
+            
             // Build the prompt for the AI model
             var prompt = new System.Text.StringBuilder();
             prompt.AppendLine("# Image Analysis Task");
@@ -185,7 +194,7 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
             prompt.AppendLine();
             prompt.AppendLine("If no projects/tasks are found, return an empty projects array.");
             
-            // Call the AI service with the image
+            // Call the AI service with the image and user context
             var client = _chatClientService.GetClient();
             if (client == null)
             {
@@ -199,6 +208,19 @@ public partial class PhotoPageModel : ObservableObject, IProjectTaskPageModel, I
                 new TextContent(prompt.ToString()),
                 new DataContent(imageBytes, mediaType: "image/png")
             ]);
+            
+            // Note: We can't easily inject context into ChatMessage-based calls
+            // This is a limitation of the image analysis API
+            // Consider adding context as a text prefix in the prompt instead
+            if (!string.IsNullOrWhiteSpace(userContext))
+            {
+                msg = new Microsoft.Extensions.AI.ChatMessage(ChatRole.User,
+                [
+                    new TextContent($"# USER CONTEXT\\n{userContext}\\n\\n{prompt}"),
+                    new DataContent(imageBytes, mediaType: "image/png")
+                ]);
+                _logger.LogInformation("Including user context in photo analysis prompt");
+            }
             
             var apiResponse = await client.GetResponseAsync<ProjectsJson>(msg);
             

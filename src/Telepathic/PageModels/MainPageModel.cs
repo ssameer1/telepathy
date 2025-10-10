@@ -969,13 +969,30 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 			_logger.LogInformation($"AI Context: {sb.ToString()}");
 
 			AnalysisStatusDetail = "Applying futuristic intelligence to your tasks...";
+			
+			// Get user memory snapshot for context
+			var snapshot = await _memoryStore.GetSnapshotAsync(MemoryConstants.UserId);
+			string? userContext = null;
+			if (snapshot != null)
+			{
+				userContext = snapshot.GetFormattedText();
+				_logger.LogInformation("Including memory snapshot in telepathy analysis (version {Version})", snapshot.Version);
+			}
+			
 			// Send to AI for analysis with MCP tools included
 			var chatClient = _chatClientService.GetClient();
 			if (chatClient != null)
 			{
 				try
 				{
-					var apiResponse = await chatClient.GetResponseAsync<PriorityTaskResult>(sb.ToString());
+					// Include snapshot context by prepending it to the prompt
+					string finalPrompt = sb.ToString();
+					if (!string.IsNullOrWhiteSpace(userContext))
+					{
+						finalPrompt = $"# USER MEMORY\\n{userContext}\\n\\n{finalPrompt}";
+					}
+					
+					var apiResponse = await chatClient.GetResponseAsync<PriorityTaskResult>(finalPrompt);
 					if (apiResponse?.Result != null)
 					{
 						// Track AI telepathy usage

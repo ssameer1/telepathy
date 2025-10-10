@@ -36,8 +36,9 @@ public interface IChatClientService
     /// </summary>
     /// <typeparam name="T">The type to deserialize the response to</typeparam>
     /// <param name="prompt">The prompt to send to the chat client</param>
+    /// <param name="userContext">Optional user context (e.g., memory snapshot) to prepend to the prompt</param>
     /// <returns>The chat response</returns>
-    Task<ChatResponse<T>> GetResponseWithToolsAsync<T>(string prompt);
+    Task<ChatResponse<T>> GetResponseWithToolsAsync<T>(string prompt, string? userContext = null);
 
     /// <summary>
     /// Updates the chat client with a new API key
@@ -131,7 +132,7 @@ public class ChatClientService : IChatClientService
     /// <summary>
     /// Gets a response from the chat client with MCP tools included
     /// </summary>
-    public async Task<ChatResponse<T>> GetResponseWithToolsAsync<T>(string prompt)
+    public async Task<ChatResponse<T>> GetResponseWithToolsAsync<T>(string prompt, string? userContext = null)
     {
         var client = GetClient();
         var tools = await GetMcpToolsAsync();
@@ -142,8 +143,16 @@ public class ChatClientService : IChatClientService
         // Don't use the tools directly - instead let MCP system handle registration
         // The LocationTools is already registered with the MCP server
 
+        // Prepend user context if provided
+        string finalPrompt = prompt;
+        if (!string.IsNullOrWhiteSpace(userContext))
+        {
+            finalPrompt = $"# USER CONTEXT\n{userContext}\n\n# USER REQUEST\n{prompt}";
+            _logger.LogInformation("Including user context in prompt ({ContextLength} chars)", userContext.Length);
+        }
+
         _logger.LogInformation("Calling chat client with location tools available");
-        return await client.GetResponseAsync<T>(prompt, options);
+        return await client.GetResponseAsync<T>(finalPrompt, options);
     }
 
     public void UpdateClient(string apiKey, string model = "gpt-4o-mini")

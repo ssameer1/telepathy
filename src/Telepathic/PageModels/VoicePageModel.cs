@@ -270,6 +270,15 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
             AnalysisStatusTitle = "Analyzing Content";
             AnalysisStatusDetail = "Using AI to identify tasks and projects in your recording...";
 
+            // Get user memory snapshot for context
+            var snapshot = await _memoryStore.GetSnapshotAsync(MemoryConstants.UserId);
+            string? userContext = null;
+            if (snapshot != null)
+            {
+                userContext = snapshot.GetFormattedText();
+                _logger.LogInformation("Including memory snapshot in voice analysis (version {Version})", snapshot.Version);
+            }
+
             // ignore the audio and just see if we can get something meaningful from this text
             // Transcript = "This week we are going to the Good Friday service at church, but we need to get Nolan from the airport around 9:30. This weekend we have an easter egg hunt at church and then after church Sunday morning we are going to Mammy's house for lunch and an egg hunt. We need to take a dish and the bag of candy for filling eggs.";
 
@@ -284,7 +293,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
 
                 Here's the transcript: {Transcript}";
 
-            // Get response from the AI service
+            // Get response from the AI service with user context
             var chatClient = _chatClientService.GetClient();
             var response = await chatClient.GetResponseAsync<ProjectsJson>(prompt);
 
