@@ -144,10 +144,19 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 	}
 
 	[RelayCommand]
-	Task RejectRecommendation(ProjectTask? task)	{
+	async Task RejectRecommendation(ProjectTask? task)
+	{
 		if (task != null)
+		{
+			// Track recommendation rejection (strong negative signal)
+			await _memoryStore.LogEventAsync(MemoryEvent.Create(
+				"recommendation:reject",
+				task.Title,
+				new { source = "priority" },
+				1.5)); // Higher weight - explicit user choice
+
 			_logger.LogInformation("Rejecting recommendation for task: {TaskTitle}", task.Title);
-		return Task.CompletedTask;
+		}
 	}
 
 	[RelayCommand]

@@ -393,23 +393,34 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
     /// Accept a recommended task and add it to its project
     /// </summary>
     [RelayCommand]
-    private Task AcceptRecommendation(ProjectTask task)
+    private async Task AcceptRecommendation(ProjectTask task)
     {
+        // Track recommendation acceptance (strong positive signal)
+        await _memoryStore.LogEventAsync(MemoryEvent.Create(
+            "recommendation:accept",
+            task.Title,
+            new { source = "voice" },
+            1.5)); // Higher weight - explicit user choice
 
         // Mark the task as no longer a recommendation
         task.IsRecommendation = false;
 
         _logger.LogInformation("Accepted recommended task: {TaskTitle}", task.Title);
-
-        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Reject a recommended task
     /// </summary>
     [RelayCommand]
-    private Task RejectRecommendation(ProjectTask task)
+    private async Task RejectRecommendation(ProjectTask task)
     {
+        // Track recommendation rejection (strong negative signal)
+        await _memoryStore.LogEventAsync(MemoryEvent.Create(
+            "recommendation:reject",
+            task.Title,
+            new { source = "voice" },
+            1.5)); // Higher weight - explicit user choice
+
         // Find and remove the task from its project
         foreach (var project in Projects)
         {
@@ -421,8 +432,6 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
                 break;
             }
         }
-
-        return Task.CompletedTask;
     }
 
     /// <summary>

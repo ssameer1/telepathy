@@ -204,10 +204,17 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 	}
 
 	[RelayCommand]
-	private Task AcceptRecommendation(ProjectTask task)
+	private async Task AcceptRecommendation(ProjectTask task)
 	{
 		if (!_project.IsNullOrNew() && task != null)
 		{
+			// Track recommendation acceptance (strong positive signal)
+			await _memoryStore.LogEventAsync(MemoryEvent.Create(
+				"recommendation:accept",
+				task.Title,
+				new { projectName = _project.Name },
+				1.5)); // Higher weight - explicit user choice
+
 			_project.Tasks.Add(task);
 			Tasks = new List<ProjectTask>(_project.Tasks);
 
@@ -217,21 +224,25 @@ public partial class ProjectDetailPageModel : ObservableObject, IQueryAttributab
 			RecommendedTasks = updatedRecommendations;
 			HasRecommendations = RecommendedTasks.Count > 0;
 		}
-		return Task.CompletedTask;
 	}
 
 	[RelayCommand]
-	private Task RejectRecommendation(ProjectTask task)
+	private async Task RejectRecommendation(ProjectTask task)
 	{
 		if (task != null && RecommendedTasks.Contains(task))
 		{
+			// Track recommendation rejection (strong negative signal)
+			await _memoryStore.LogEventAsync(MemoryEvent.Create(
+				"recommendation:reject",
+				task.Title,
+				new { projectName = _project?.Name },
+				1.5)); // Higher weight - explicit user choice
+
 			var updatedTasks = RecommendedTasks.ToList();
 			updatedTasks.Remove(task);
 			RecommendedTasks = updatedTasks;
 			HasRecommendations = RecommendedTasks.Count > 0;
 		}
-		
-		return Task.CompletedTask;
 	}
 
 	[RelayCommand]
