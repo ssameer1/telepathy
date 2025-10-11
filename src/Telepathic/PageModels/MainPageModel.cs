@@ -523,7 +523,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 		var isTelepathyEnabled = Preferences.Default.Get("telepathy_enabled", false);
 		var openAIApiKey = Preferences.Default.Get("openai_api_key", string.Empty);
 		var foundryApiKey = Preferences.Default.Get("foundry_api_key", string.Empty);
-		
+
 		// Early exit if telepathy is disabled or we're missing the API client
 		if (!isTelepathyEnabled || !_chatClientService.IsInitialized || (string.IsNullOrWhiteSpace(openAIApiKey) && string.IsNullOrWhiteSpace(foundryApiKey)))
 		{
@@ -867,33 +867,33 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 
 		var chatClient = _chatClientService.GetClient();
 		if (chatClient != null)
-	{
-		var sb = new System.Text.StringBuilder();
-
-		// Try to get current location if needed
-		var location = _locationTools.GetCurrentLocation();
-		if (location.Latitude == 0 && location.Longitude == 0)
 		{
-			try
+			var sb = new System.Text.StringBuilder();
+
+			// Try to get current location if needed
+			var location = _locationTools.GetCurrentLocation();
+			if (location.Latitude == 0 && location.Longitude == 0)
 			{
-				var currentLocation = await Geolocation.GetLastKnownLocationAsync();
-				if (currentLocation != null)
+				try
 				{
-					_locationTools.SetCurrentLocation(currentLocation.Latitude, currentLocation.Longitude);
-					location = (currentLocation.Latitude, currentLocation.Longitude);
+					var currentLocation = await Geolocation.GetLastKnownLocationAsync();
+					if (currentLocation != null)
+					{
+						_locationTools.SetCurrentLocation(currentLocation.Latitude, currentLocation.Longitude);
+						location = (currentLocation.Latitude, currentLocation.Longitude);
+					}
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Failed to get current location");
 				}
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Failed to get current location");
-			}
-		}
 
-		// Add basic context information
-		sb.AppendLine("List any specific location that is nearby that could help me with this task.");
-		sb.AppendLine($"Task: {task.Title}");
-		sb.AppendLine($"Details: {task.Task.AssistData}");
-		sb.AppendLine($"Current location: {location.Latitude}, {location.Longitude}");
+			// Add basic context information
+			sb.AppendLine("List any specific location that is nearby that could help me with this task.");
+			sb.AppendLine($"Task: {task.Title}");
+			sb.AppendLine($"Details: {task.Task.AssistData}");
+			sb.AppendLine($"Current location: {location.Latitude}, {location.Longitude}");
 			sb.AppendLine($"IsNearby a coffee shop"); _logger.LogDebug("AI Task Analysis Prompt: {Prompt}", sb.ToString());
 
 			try
