@@ -181,14 +181,6 @@ public partial class MainPage : ContentPage
 		addButtonColor.Commit(this, "AddButtonColorAnimation", 16, 250, Easing.CubicIn);
 	}
 	
-	private void CalendarCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
-	{
-		if (sender is CheckBox checkBox && checkBox.BindingContext is CalendarInfo calendar && BindingContext is MainPageModel viewModel)
-		{
-			viewModel.ToggleCalendarSelectionCommand.Execute(calendar);
-		}
-	}
-	
 	private void PriorityTask_CheckedChanged(object sender, CheckedChangedEventArgs e)
 	{
 		var checkbox = (CheckBox)sender;

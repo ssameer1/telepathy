@@ -27,7 +27,6 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 	private readonly TaskAssistHandler _taskAssistHandler;
 	private readonly LocationTools _locationTools;
 	private readonly IUserMemoryStore _memoryStore;
-	private CancellationTokenSource? _cancelTokenSource;
 	private DateTime _lastPriorityCheck = DateTime.MinValue;
 	private const int PRIORITY_CHECK_HOURS = 4;
 
@@ -73,62 +72,11 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 	[ObservableProperty]
 	private string _personalizedGreeting = "Greetings, Space Adventurer!";
 
-	[ObservableProperty]
-	private bool _isSettingsSheetOpen;
-
-
-
-	[ObservableProperty]
-	private string _openAIApiKey = Preferences.Default.Get("openai_api_key", string.Empty);
-	[ObservableProperty]
-	private string _googlePlacesApiKey = Preferences.Default.Get("google_places_api_key", string.Empty);
-
-	[ObservableProperty]
-	private string _foundryEndpoint = Preferences.Default.Get("foundry_endpoint", string.Empty);
-
-	[ObservableProperty]
-	private string _foundryApiKey = Preferences.Default.Get("foundry_api_key", string.Empty);
-
-	// Entry fields for UI binding
-	[ObservableProperty]
-	private string _openAIApiKeyEntry;
-	[ObservableProperty]
-	private string _googlePlacesApiKeyEntry;
-
-	[ObservableProperty]
-	private string _foundryEndpointEntry;
-
-	[ObservableProperty]
-	private string _foundryApiKeyEntry;
-
 	[NotifyPropertyChangedFor(nameof(ShouldShowPriorityTasks))]
 	[ObservableProperty]
 	private bool _isTelepathyEnabled = Preferences.Default.Get("telepathy_enabled", false);
 
 	public bool ShouldShowPriorityTasks => HasPriorityTasks && IsTelepathyEnabled;
-
-	[ObservableProperty]
-	private string _calendarButtonText = Preferences.Default.Get("calendar_connected", false) ? "Disconnect" : "Connect";
-
-	[ObservableProperty]
-	private string _aboutMeText = Preferences.Default.Get("about_me_text", string.Empty);
-
-	[ObservableProperty]
-	private ObservableCollection<CalendarInfo> _userCalendars = new();
-
-	[ObservableProperty]
-	private bool _isLoadingCalendars;
-
-	[ObservableProperty]
-	private bool _hasLoadedCalendars;
-
-	[ObservableProperty]
-	private bool _isLocationEnabled = Preferences.Default.Get("location_enabled", false);
-
-	[ObservableProperty]
-	private string _currentLocation = "Location not available";
-	[ObservableProperty]
-	private bool _isGettingLocation;
 
 	[ObservableProperty]
 	private int _cardVisibleIndex = 0;
@@ -168,7 +116,8 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 		try
 		{
 			IsBusy = true;
-			await _taskAssistHandler.HandleAssistAsync(task, IsLocationEnabled);
+			var isLocationEnabled = Preferences.Default.Get("location_enabled", false);
+			await _taskAssistHandler.HandleAssistAsync(task, isLocationEnabled);
 		}
 		catch (Exception ex)
 		{
@@ -224,7 +173,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 				// Not valid coordinates - treat as address/place name
 				await Map.Default.OpenAsync(placemark);
 			}
-			else if (IsLocationEnabled)
+			else if (Preferences.Default.Get("location_enabled", false))
 			{
 				// No location specified - use current cosmic coordinates
 				var currentLocation = await Geolocation.GetLastKnownLocationAsync();
@@ -266,41 +215,6 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 		_taskAssistHandler = taskAssistHandler;
 		_locationTools = locationTools;
 		_memoryStore = memoryStore;
-		// Sync entry fields for UI
-		OpenAIApiKeyEntry = OpenAIApiKey;
-		GooglePlacesApiKeyEntry = GooglePlacesApiKey;
-		FoundryEndpointEntry = FoundryEndpoint;
-		FoundryApiKeyEntry = FoundryApiKey;
-
-		_locationTools.SetGooglePlacesApiKey(GooglePlacesApiKey);
-
-		// Load saved calendar choices
-		LoadSavedCalendars();
-
-		// Initialize location if enabled
-		if (IsLocationEnabled)
-		{
-			_ = GetCurrentLocationAsync();
-		}
-	}
-
-	partial void OnOpenAIApiKeyEntryChanged(string value)
-	{
-		OpenAIApiKey = value;
-	}
-	partial void OnGooglePlacesApiKeyEntryChanged(string value)
-	{
-		GooglePlacesApiKey = value;
-	}
-
-	partial void OnFoundryEndpointEntryChanged(string value)
-	{
-		FoundryEndpoint = value;
-	}
-
-	partial void OnFoundryApiKeyEntryChanged(string value)
-	{
-		FoundryApiKey = value;
 	}
 
 	/// <summary>
@@ -312,8 +226,22 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 
 		try
 		{
-			// Only proceed if we have selected calendars
-			if (!UserCalendars.Any(c => c.IsSelected))
+			// Get the selected calendars from preferences
+			var savedCalendarsJson = Preferences.Default.Get("saved_calendars", string.Empty);
+			if (string.IsNullOrEmpty(savedCalendarsJson))
+				return results;
+
+			List<CalendarInfo>? savedCalendars = null;
+			try
+			{
+				savedCalendars = System.Text.Json.JsonSerializer.Deserialize<List<CalendarInfo>>(savedCalendarsJson);
+			}
+			catch
+			{
+				return results;
+			}
+
+			if (savedCalendars == null || !savedCalendars.Any(c => c.IsSelected))
 				return results;
 
 			// Get events for today
@@ -324,7 +252,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 			var calendars = await _calendarStore.GetCalendars();
 
 			// Filter to only selected calendars by ID
-			var selectedCalendarIds = UserCalendars.Where(c => c.IsSelected).Select(c => c.Id).ToHashSet();
+			var selectedCalendarIds = savedCalendars.Where(c => c.IsSelected).Select(c => c.Id).ToHashSet();
 			var selectedCalendars = calendars.Where(c => selectedCalendarIds.Contains(c.Id)).ToList();
 
 			foreach (var calendar in selectedCalendars)
@@ -569,220 +497,12 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 	}
 
 
-	partial void OnOpenAIApiKeyChanged(string value)
-	{
-		_logger.LogInformation($"OpenAI API Key changed");
-		Preferences.Default.Set("openai_api_key", value);
-	}
-	partial void OnGooglePlacesApiKeyChanged(string value)
-	{
-		if (!string.IsNullOrWhiteSpace(value))
-			Preferences.Default.Set("google_places_api_key", value);
-		else
-			Preferences.Default.Remove("google_places_api_key");
-		_locationTools.SetGooglePlacesApiKey(value);
-	}
 
-	partial void OnFoundryEndpointChanged(string value)
-	{
-		_logger.LogInformation($"Foundry Endpoint changed");
-		if (!string.IsNullOrWhiteSpace(value))
-			Preferences.Default.Set("foundry_endpoint", value);
-		else
-			Preferences.Default.Remove("foundry_endpoint");
-	}
 
-	partial void OnFoundryApiKeyChanged(string value)
-	{
-		_logger.LogInformation($"Foundry API Key changed");
-		if (!string.IsNullOrWhiteSpace(value))
-			Preferences.Default.Set("foundry_api_key", value);
-		else
-			Preferences.Default.Remove("foundry_api_key");
-	}
 
-	partial void OnAboutMeTextChanged(string value)
-	{
-		Preferences.Default.Set("about_me_text", value);
-	}
 
-	[RelayCommand]
-	private async Task ToggleSettings()
-	{
-		// Toggle the settings sheet open/closed state
-		IsSettingsSheetOpen = !IsSettingsSheetOpen;
-		// When closing settings panel, check if we need to analyze tasks
-		if (!IsSettingsSheetOpen && IsTelepathyEnabled && !HasPriorityTasks)
-		{
-			await AnalyzeAndPrioritizeTasks();
-		}
-	}
-	[RelayCommand]
-	private async Task SaveApiKey()
-	{
-		_logger.LogInformation($"API Keys and settings saved");
 
-		// Save all API keys and settings
-		Preferences.Default.Set("openai_api_key", OpenAIApiKey);
-		if (!string.IsNullOrWhiteSpace(FoundryEndpoint))
-			Preferences.Default.Set("foundry_endpoint", FoundryEndpoint);
-		if (!string.IsNullOrWhiteSpace(FoundryApiKey))
-			Preferences.Default.Set("foundry_api_key", FoundryApiKey);
 
-		// Update the chat client with the new settings
-		try
-		{
-			// Determine which provider to use based on available settings
-			if (!string.IsNullOrWhiteSpace(FoundryEndpoint) && !string.IsNullOrWhiteSpace(FoundryApiKey))
-			{
-				_chatClientService.UpdateClient(FoundryApiKey, "foundry", FoundryEndpoint);
-				await AppShell.DisplayToastAsync("Foundry settings saved and chat client updated!");
-			}
-			else if (!string.IsNullOrWhiteSpace(OpenAIApiKey))
-			{
-				_chatClientService.UpdateClient(OpenAIApiKey);
-				await AppShell.DisplayToastAsync("OpenAI API Key saved and chat client updated!");
-			}
-			else
-			{
-				await AppShell.DisplayToastAsync("Settings saved! Please provide either OpenAI or Foundry credentials to enable AI features.");
-			}
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Failed to update chat client with new settings");
-			await AppShell.DisplayToastAsync("Settings saved, but failed to initialize chat client. Please check your credentials and try again.");
-		}
-	}
-
-	private void LoadSavedCalendars()
-	{
-		var savedCalendarsJson = Preferences.Default.Get("saved_calendars", string.Empty);
-		if (!string.IsNullOrEmpty(savedCalendarsJson))
-		{
-			try
-			{
-				var savedCalendars = System.Text.Json.JsonSerializer.Deserialize<List<CalendarInfo>>(savedCalendarsJson);
-				if (savedCalendars != null)
-				{
-					UserCalendars = new ObservableCollection<CalendarInfo>(savedCalendars);
-					HasLoadedCalendars = true;
-				}
-			}
-			catch
-			{
-				// Silent fail, will reload calendars
-			}
-		}
-	}
-
-	private void SaveSelectedCalendars()
-	{
-		var calendarsJson = System.Text.Json.JsonSerializer.Serialize(UserCalendars);
-		Preferences.Default.Set("saved_calendars", calendarsJson);
-	}
-
-	[RelayCommand]
-	private async Task LoadCalendars()
-	{
-		if (IsLoadingCalendars)
-			return;
-
-		try
-		{
-			IsLoadingCalendars = true;
-
-			var calendars = await _calendarStore.GetCalendars();
-			var tempCalendars = new List<CalendarInfo>();
-
-			// If we already have saved calendars, preserve selections
-			var existingCalendars = UserCalendars.ToDictionary(c => c.Id, c => c);
-
-			foreach (var calendar in calendars)
-			{
-				bool isSelected = existingCalendars.ContainsKey(calendar.Id) && existingCalendars[calendar.Id].IsSelected;
-				tempCalendars.Add(new CalendarInfo(calendar.Id, calendar.Name, isSelected));
-			}
-
-			UserCalendars = new ObservableCollection<CalendarInfo>(tempCalendars);
-			SaveSelectedCalendars();
-
-			HasLoadedCalendars = true;
-			CalendarButtonText = UserCalendars.Any(c => c.IsSelected) ? "Manage Calendars" : "Connect";
-			Preferences.Default.Set("calendar_connected", UserCalendars.Any(c => c.IsSelected));
-		}
-		catch (Exception ex)
-		{
-			_errorHandler.HandleError(ex);
-		}
-		finally
-		{
-			IsLoadingCalendars = false;
-		}
-	}
-
-	[RelayCommand]
-	private async Task ToggleCalendarSelection(CalendarInfo calendar)
-	{
-		SaveSelectedCalendars();
-
-		CalendarButtonText = UserCalendars.Any(c => c.IsSelected) ? "Manage Calendars" : "Connect";
-		Preferences.Default.Set("calendar_connected", UserCalendars.Any(c => c.IsSelected));
-		await AppShell.DisplayToastAsync($"Calendar '{calendar.Name}' {(calendar.IsSelected ? "connected" : "disconnected")}!");
-	}
-
-	[RelayCommand]
-	private async Task ToggleCalendar()
-	{
-		await LoadCalendars();
-		// if (!HasLoadedCalendars)
-		// {
-		// 	await LoadCalendars();
-		// }
-		// else
-		// {
-		// 	// We already have calendars, so this is just to show the calendar section
-		// }
-	}
-
-	[RelayCommand]
-	private async Task DisconnectAllCalendars()
-	{
-		foreach (var calendar in UserCalendars)
-		{
-			calendar.IsSelected = false;
-		}
-
-		SaveSelectedCalendars();
-		CalendarButtonText = "Connect";
-		Preferences.Default.Set("calendar_connected", false);
-		await AppShell.DisplayToastAsync("All calendars disconnected!");
-	}
-
-	partial void OnIsLocationEnabledChanged(bool value)
-	{
-		Preferences.Default.Set("location_enabled", value);
-
-		if (value)
-		{
-			_ = GetCurrentLocationAsync();
-		}
-		else
-		{
-			CurrentLocation = "Location not available";
-			if (_cancelTokenSource != null && !_cancelTokenSource.IsCancellationRequested)
-				_cancelTokenSource.Cancel();
-		}
-	}
-
-	[RelayCommand]
-	public async Task RefreshLocationAsync()
-	{
-		if (IsLocationEnabled)
-		{
-			await GetCurrentLocationAsync();
-		}
-	}
 
 	[RelayCommand]
 	private async Task ForcePriorityTaskRefresh()
@@ -793,55 +513,19 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 		await AnalyzeAndPrioritizeTasks();
 	}
 
-	public async Task GetCurrentLocationAsync()
-	{
-		try
-		{
-			IsGettingLocation = true;
-			_cancelTokenSource = new CancellationTokenSource();
-
-			var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
-			var location = await Geolocation.GetLocationAsync(request, _cancelTokenSource.Token);
-
-			if (location != null)
-			{
-				// Update display string
-				CurrentLocation = $"Lat: {location.Latitude:F4}, Long: {location.Longitude:F4}";
-
-				// Update the location in the location service
-				_locationTools.SetCurrentLocation(location.Latitude, location.Longitude);
-			}
-			else
-			{
-				CurrentLocation = "Location unavailable";
-			}
-		}
-		catch (FeatureNotSupportedException)
-		{
-			CurrentLocation = "Location not supported on this device";
-		}
-		catch (PermissionException)
-		{
-			CurrentLocation = "Location permission not granted";
-		}
-		catch (Exception ex)
-		{
-			CurrentLocation = $"Error: {ex.Message}";
-		}
-		finally
-		{
-			IsGettingLocation = false;
-		}
-	}
-
 	/// <summary>
 	/// Analyzes tasks based on calendar events, location, time of day, and personal preferences
 	/// to identify priority tasks that should be highlighted to the user.
 	/// </summary>
 	private async Task AnalyzeAndPrioritizeTasks()
 	{
+		// Get settings from Preferences
+		var isTelepathyEnabled = Preferences.Default.Get("telepathy_enabled", false);
+		var openAIApiKey = Preferences.Default.Get("openai_api_key", string.Empty);
+		var foundryApiKey = Preferences.Default.Get("foundry_api_key", string.Empty);
+		
 		// Early exit if telepathy is disabled or we're missing the API client
-		if (!IsTelepathyEnabled || !_chatClientService.IsInitialized || (string.IsNullOrWhiteSpace(OpenAIApiKey) && string.IsNullOrWhiteSpace(FoundryApiKey)))
+		if (!isTelepathyEnabled || !_chatClientService.IsInitialized || (string.IsNullOrWhiteSpace(openAIApiKey) && string.IsNullOrWhiteSpace(foundryApiKey)))
 		{
 			PriorityTasks = [];
 			HasPriorityTasks = false;
@@ -887,32 +571,30 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 			sb.AppendLine($"Time of Day: {GetTimeOfDayDescription(now)}");
 
 			// Location
-			if (IsLocationEnabled)
+			var isLocationEnabled = Preferences.Default.Get("location_enabled", false);
+			if (isLocationEnabled)
 			{
-				sb.AppendLine($"Current Location: {CurrentLocation}");
-
-				// Update the location in the location service if it's not already set
-				// This ensures that even if GetCurrentLocationAsync hasn't been called yet,
-				// we still set the location for the location service
-				if (CurrentLocation != "Location not available" &&
-					!CurrentLocation.StartsWith("Error:") &&
-					CurrentLocation.Contains(","))
+				try
 				{
-					try
+					var location = _locationTools.GetCurrentLocation();
+					if (location.Latitude != 0 && location.Longitude != 0)
 					{
-						// Parse the location string "Lat: 12.3456, Long: 78.9012"
-						var parts = CurrentLocation.Split(',');
-						if (parts.Length == 2)
+						sb.AppendLine($"Current Location: Lat: {location.Latitude:F4}, Long: {location.Longitude:F4}");
+					}
+					else
+					{
+						// Try to get current location if not already set
+						var currentLocation = await Geolocation.GetLastKnownLocationAsync();
+						if (currentLocation != null)
 						{
-							double lat = double.Parse(parts[0].Trim().Replace("Lat:", "").Trim());
-							double lng = double.Parse(parts[1].Trim().Replace("Long:", "").Trim());
-							_locationTools.SetCurrentLocation(lat, lng);
+							_locationTools.SetCurrentLocation(currentLocation.Latitude, currentLocation.Longitude);
+							sb.AppendLine($"Current Location: Lat: {currentLocation.Latitude:F4}, Long: {currentLocation.Longitude:F4}");
 						}
 					}
-					catch (Exception ex)
-					{
-						_logger.LogError(ex, "Failed to parse location string: {Location}", CurrentLocation);
-					}
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Failed to get location");
 				}
 			}
 
@@ -931,10 +613,11 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 			}
 
 			// About me
-			if (!string.IsNullOrWhiteSpace(AboutMeText))
+			var aboutMeText = Preferences.Default.Get("about_me_text", string.Empty);
+			if (!string.IsNullOrWhiteSpace(aboutMeText))
 			{
 				sb.AppendLine("\nABOUT ME:");
-				sb.AppendLine(AboutMeText);
+				sb.AppendLine(aboutMeText);
 			}
 			// Add only incomplete tasks - no need to process completed ones!
 			sb.AppendLine("\nACTIVE TASKS:");
@@ -959,7 +642,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 			sb.AppendLine("- ONLY recommend tasks appropriate for this time of day - e.g. don't suggest evening activities in the morning");
 
 			// Add instructions about using the IsNearby function
-			if (IsLocationEnabled)
+			if (isLocationEnabled)
 			{
 				sb.AppendLine("\nYou have access to a special function called IsNearby that can tell you if the user is near a specific type of location:");
 				sb.AppendLine("- Use the IsNearby function to check if the user is near places mentioned in tasks");
@@ -1014,7 +697,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 							{
 								priority_tasks_found = apiResponse.Result.PriorityTasks?.Count ?? 0,
 								has_calendar = events.Any(),
-								has_location = IsLocationEnabled
+								has_location = Preferences.Default.Get("location_enabled", false)
 							},
 							1.5));
 
@@ -1184,16 +867,33 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
 
 		var chatClient = _chatClientService.GetClient();
 		if (chatClient != null)
+	{
+		var sb = new System.Text.StringBuilder();
+
+		// Try to get current location if needed
+		var location = _locationTools.GetCurrentLocation();
+		if (location.Latitude == 0 && location.Longitude == 0)
 		{
-			var sb = new System.Text.StringBuilder();
+			try
+			{
+				var currentLocation = await Geolocation.GetLastKnownLocationAsync();
+				if (currentLocation != null)
+				{
+					_locationTools.SetCurrentLocation(currentLocation.Latitude, currentLocation.Longitude);
+					location = (currentLocation.Latitude, currentLocation.Longitude);
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Failed to get current location");
+			}
+		}
 
-			await GetCurrentLocationAsync(); // set the _locationTools
-
-			// Add basic context information
-			sb.AppendLine("List any specific location that is nearby that could help me with this task.");
-			sb.AppendLine($"Task: {task.Title}");
-			sb.AppendLine($"Details: {task.Task.AssistData}");
-			sb.AppendLine($"Current location: {_locationTools.GetCurrentLocation().Latitude}, {_locationTools.GetCurrentLocation().Longitude}");
+		// Add basic context information
+		sb.AppendLine("List any specific location that is nearby that could help me with this task.");
+		sb.AppendLine($"Task: {task.Title}");
+		sb.AppendLine($"Details: {task.Task.AssistData}");
+		sb.AppendLine($"Current location: {location.Latitude}, {location.Longitude}");
 			sb.AppendLine($"IsNearby a coffee shop"); _logger.LogDebug("AI Task Analysis Prompt: {Prompt}", sb.ToString());
 
 			try

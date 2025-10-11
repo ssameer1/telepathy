@@ -48,28 +48,7 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Shell.TitleView>
-        <Grid>
-            <ImageButton Source="{toolkit:AppThemeResource TelepathyIcon}"
-                         IsVisible="{Binding IsTelepathyEnabled,Converter={StaticResource InvertedBoolConverter}}"
-                         HorizontalOptions="End"
-                         VerticalOptions="Center"
-                         Aspect="AspectFit"
-                         HeightRequest="44"
-                         WidthRequest="44"
-                         Background="Transparent"
-                         Command="{Binding ToggleSettingsCommand}"/>
-            <ImageButton Source="icon_telepathy_on.png"
-                         IsVisible="{Binding IsTelepathyEnabled}"
-                         HorizontalOptions="End"
-                         VerticalOptions="Center"
-                         Aspect="AspectFit"
-                         HeightRequest="44"
-                         WidthRequest="44"
-                         Background="Transparent"
-                         Command="{Binding ToggleSettingsCommand}"/>
-        </Grid>
-    </Shell.TitleView>
+
 
     <Grid SafeAreaEdges="None">
         <ScrollView x:Name="ScrollView"
@@ -366,125 +345,7 @@
 
         </VerticalStackLayout>
 
-        <!-- Settings Bottom Sheet -->
-        <bottomSheet:SfBottomSheet x:Name="SettingsSheet"
-                                   IsOpen="{Binding IsSettingsSheetOpen, Mode=TwoWay}"
-                                   GrabberBackground="{toolkit:AppThemeResource OnBackground}"
-                                   GrabberHeight="5"
-                                   Background="{toolkit:AppThemeResource Surface1}"
-                                   CornerRadius="24">
-            <bottomSheet:SfBottomSheet.BottomSheetContent>
-                <ScrollView>
-                    <VerticalStackLayout Padding="24"
-                                         Spacing="24">
-                        <Label Text="Settings"
-                               FontAttributes="Bold"
-                               FontSize="24"
-                               HorizontalOptions="Center"/>
 
-                        <sf:SfTextInputLayout IsHintAlwaysFloated="True"
-                                              Hint="Enable Telepathy"
-                                              Padding="8">
-                            <Switch IsToggled="{Binding IsTelepathyEnabled, Mode=TwoWay}"
-                                    OnColor="{toolkit:AppThemeResource Primary}"/>
-                        </sf:SfTextInputLayout>
-
-                        <sf:SfTextInputLayout IsHintAlwaysFloated="True"
-                                              Hint="Enable Location Services"
-                                              Padding="8">
-                            <VerticalStackLayout Spacing="8">
-                                <Switch IsToggled="{Binding IsLocationEnabled, Mode=TwoWay}"
-                                        OnColor="{toolkit:AppThemeResource Primary}"/>
-
-                                <Grid ColumnDefinitions="*, Auto"
-                                      IsVisible="{Binding IsLocationEnabled}">
-                                    <Label Text="{Binding CurrentLocation}"
-                                           VerticalOptions="Center"
-                                           Margin="0,8,0,0"/>
-
-                                    <Button Grid.Column="1"
-                                            Text="Refresh"
-                                            Command="{Binding RefreshLocationCommand}"
-                                            IsVisible="{Binding IsLocationEnabled}"
-                                            IsEnabled="{Binding IsGettingLocation, Converter={StaticResource InvertedBoolConverter}}"
-                                            Margin="8,0,0,0"/>
-                                </Grid>
-
-                                <ActivityIndicator IsRunning="{Binding IsGettingLocation}"
-                                                   IsVisible="{Binding IsGettingLocation}"
-                                                   HorizontalOptions="Start"/>
-                            </VerticalStackLayout>
-                        </sf:SfTextInputLayout>
-
-                        <sf:SfTextInputLayout
-                            Hint="Foundry Endpoint">
-                            <Entry Text="{Binding FoundryEndpoint, Mode=TwoWay}"
-                                   Placeholder="Enter Endpoint"/>
-                        </sf:SfTextInputLayout>
-
-                        <sf:SfTextInputLayout
-                            Hint="Foundry API Key">
-                            <Entry Text="{Binding FoundryApiKey, Mode=TwoWay}"
-                                   Placeholder="Enter API Key"
-                                   IsPassword="True"/>
-                        </sf:SfTextInputLayout>
-
-                        <sf:SfTextInputLayout
-                            Hint="Google Places API Key">
-                            <Entry Text="{Binding GooglePlacesApiKeyEntry, Mode=TwoWay}"
-                                   Placeholder="Enter Google Places API Key"
-                                   IsPassword="True"/>
-                        </sf:SfTextInputLayout>
-
-                        <sf:SfTextInputLayout IsHintAlwaysFloated="True"
-                                              Hint="Calendar(s)"
-                                              Padding="8">
-
-                            <VerticalStackLayout Spacing="10">
-                                <ActivityIndicator IsRunning="{Binding IsLoadingCalendars}"
-                                                   IsVisible="{Binding IsLoadingCalendars}"
-                                                   HorizontalOptions="Start"/>
-
-                                <VerticalStackLayout
-                                    Spacing="10"
-                                    IsVisible="{Binding HasLoadedCalendars}"
-                                    Padding="8"
-                                    BindableLayout.ItemsSource="{Binding UserCalendars}">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate x:DataType="models:CalendarInfo">
-                                            <Grid ColumnDefinitions="*, Auto"
-                                                  Padding="0,5">
-                                                <Label Text="{Binding Name}"
-                                                       VerticalOptions="Center"/>
-                                                <CheckBox Grid.Column="1"
-                                                          IsChecked="{Binding IsSelected}"
-                                                          Color="{toolkit:AppThemeResource Primary}"
-                                                          CheckedChanged="CalendarCheckBox_CheckedChanged"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
-                                </VerticalStackLayout>
-
-
-                                <Button
-                                    Text="{Binding CalendarButtonText}"
-                                    Command="{Binding ToggleCalendarCommand}"
-                                    HorizontalOptions="Start"/>
-                            </VerticalStackLayout>
-                        </sf:SfTextInputLayout>
-
-                        <sf:SfTextInputLayout
-                            Hint="Personalization">
-                            <Editor Text="{Binding AboutMeText, Mode=TwoWay}"
-                                    HorizontalOptions="Fill"
-                                    HeightRequest="100"
-                                    Placeholder="Give me details to personalize your app experience."/>
-                        </sf:SfTextInputLayout>
-
-                    </VerticalStackLayout>
-                </ScrollView>
-            </bottomSheet:SfBottomSheet.BottomSheetContent>
-        </bottomSheet:SfBottomSheet>
     </Grid>
 
 
