@@ -8,17 +8,20 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.taskomatic.xaml" />
-                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
-                <ResourceDictionary Source="Resources/Styles/AppStyles.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Colors.taskomatic.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/AppStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-              <!-- Converters for our cosmic mission! -->            
-            <converters:CombinedTasksConverter x:Key="CombinedTasksConverter" />
+            <!-- Converters for our cosmic mission! -->
+            <converters:CombinedTasksConverter x:Key="CombinedTasksConverter"/>
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
-            <toolkit:EnumToBoolConverter x:Key="EnumToBoolConverter"/>             
-            <toolkit:BoolToObjectConverter x:Key="BoolToThicknessConverter" TrueObject="2" FalseObject="0" />
-            <toolkit:IntToBoolConverter x:Key="IntToBoolConverter"  />
-            <toolkit:IsEqualConverter x:Key="IsEqualConverter" />
+            <toolkit:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+            <toolkit:BoolToObjectConverter x:Key="BoolToThicknessConverter"
+                    TrueObject="2"
+                    FalseObject="0"/>
+            <toolkit:IntToBoolConverter x:Key="IntToBoolConverter"/>
+            <toolkit:IsEqualConverter x:Key="IsEqualConverter"/>
+            <toolkit:IsStringNotNullOrEmptyConverter x:Key="IsStringNotNullOrEmptyConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

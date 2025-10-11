@@ -5,73 +5,88 @@
              xmlns:models="clr-namespace:Telepathic.Models"
              xmlns:aloha="clr-namespace:AlohaKit.Animations;assembly=AlohaKit.Animations"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-            xmlns:expander="clr-namespace:Syncfusion.Maui.Toolkit.Expander;assembly=Syncfusion.Maui.Toolkit"
-            xmlns:controls="clr-namespace:Telepathic.Pages.Controls"
+             xmlns:expander="clr-namespace:Syncfusion.Maui.Toolkit.Expander;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:controls="clr-namespace:Telepathic.Pages.Controls"
              x:Class="Telepathic.Pages.VoicePage"
              x:DataType="pageModels:VoicePageModel"
              Title="Voice">
-    
-    
+
+
     <Grid Padding="{StaticResource LayoutPadding}">
         <!-- Recording Phase -->
         <Grid x:Name="RecordingView"
               IsVisible="{Binding Phase, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pageModels:VoicePhase.Recording}}"
-              RowDefinitions="*,Auto,*">
+              RowDefinitions="*">
 
-            <Label 
+            <Label
                 HorizontalOptions="Start"
                 VerticalOptions="Start"
                 TextColor="{toolkit:AppThemeResource OnBackground}">
                 <Label.FormattedText>
                     <FormattedString>
-                        <Span Text="Let's talk" Style="{StaticResource Title1}" 
-                            TextColor="{toolkit:AppThemeResource Primary}"/>
-                        <Span Text="&#x0a;" />
-                        <Span Text="Hit record and tell me what needs doing." 
-                            TextColor="{toolkit:AppThemeResource OnBackground}"/>
+                        <Span Text="Let's talk"
+                              Style="{StaticResource Title1}"
+                              TextColor="{toolkit:AppThemeResource Primary}"/>
+                        <Span Text="&#x0a;"/>
+                        <Span Text="Hit record and tell me what needs doing."
+                              TextColor="{toolkit:AppThemeResource OnBackground}"/>
                     </FormattedString>
                 </Label.FormattedText>
             </Label>
-              
+
+            <!-- Live Transcript Display - grows upward from bottom -->
+            <ScrollView x:Name="TranscriptScrollView"
+                        VerticalOptions="End"
+                        SafeAreaEdges="None"
+                        HeightRequest="180">
+                <Label Text="{Binding LiveTranscript}"
+                       TextColor="{toolkit:AppThemeResource OnBackground}"
+                       LineBreakMode="WordWrap"
+                       Margin="15,0"
+                       FontSize="32"/>
+            </ScrollView>
+
             <!-- Main recording button container -->
-            <Grid Grid.Row="1" HorizontalOptions="Center" VerticalOptions="Center">
+            <Grid
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
                 <!-- Ripple animations for voice sensitivity -->
-                <Grid x:Name="RippleContainer" 
+                <Grid x:Name="RippleContainer"
                       IsVisible="{Binding IsRecording}"
-                      HorizontalOptions="Center" 
+                      HorizontalOptions="Center"
                       VerticalOptions="Center"
                       InputTransparent="True">
                     <!-- Ripple 1 - Will be animated in code -->
                     <Ellipse x:Name="Ripple1"
-                            Fill="#80FF0000"
-                            WidthRequest="120"
-                            HeightRequest="120"
-                            Opacity="0"
-                            Scale="1"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
-                            
+                             Fill="#80FF0000"
+                             WidthRequest="120"
+                             HeightRequest="120"
+                             Opacity="0"
+                             Scale="1"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center"/>
+
                     <!-- Ripple 2 - Will be animated in code -->
                     <Ellipse x:Name="Ripple2"
-                            Fill="#80FF0000"
-                            WidthRequest="120"
-                            HeightRequest="120"
-                            Opacity="0"
-                            Scale="1"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
-                            
+                             Fill="#80FF0000"
+                             WidthRequest="120"
+                             HeightRequest="120"
+                             Opacity="0"
+                             Scale="1"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center"/>
+
                     <!-- Ripple 3 - Will be animated in code -->
                     <Ellipse x:Name="Ripple3"
-                            Fill="#80FF0000"
-                            WidthRequest="120"
-                            HeightRequest="120"
-                            Opacity="0"
-                            Scale="1"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
+                             Fill="#80FF0000"
+                             WidthRequest="120"
+                             HeightRequest="120"
+                             Opacity="0"
+                             Scale="1"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center"/>
                 </Grid>
-                
+
                 <!-- Main recording button -->
                 <Border x:Name="RecordButton"
                         Background="{toolkit:AppThemeResource Primary}"
@@ -80,84 +95,80 @@
                         WidthRequest="120"
                         HorizontalOptions="Center"
                         VerticalOptions="Center">
-                    
+
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ToggleRecordingCommand}" />
+                        <TapGestureRecognizer Command="{Binding ToggleRecordingCommand}"/>
                     </Border.GestureRecognizers>
-                    
+
                     <Grid>
                         <!-- Microphone icon -->
-                        <Image Source="{toolkit:AppThemeResource IconMicrophone}" 
-                               HeightRequest="60" 
+                        <Image Source="{toolkit:AppThemeResource IconMicrophone}"
+                               HeightRequest="60"
                                WidthRequest="60"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"
-                               IsVisible="{Binding IsRecording, Converter={StaticResource InvertedBoolConverter}}" />
-                        
+                               IsVisible="{Binding IsRecording, Converter={StaticResource InvertedBoolConverter}}"/>
+
                         <!-- Stop icon when recording -->
                         <Rectangle Fill="#F2E8C4"
-                                  WidthRequest="30"
-                                  HeightRequest="30"
-                                  IsVisible="{Binding IsRecording}"
-                                  HorizontalOptions="Center"
-                                  VerticalOptions="Center" />
+                                   WidthRequest="30"
+                                   HeightRequest="30"
+                                   IsVisible="{Binding IsRecording}"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
                     </Grid>
                 </Border>
             </Grid>
-            
+
             <!-- Status text -->
             <!-- <Label Text="{Binding IsRecording, Converter={StaticResource BoolToObjectConverter}, ConverterParameter='Recording...,Tap to Record'}"
                    Grid.Row="2"
                    Margin="0,20,0,0"
                    HorizontalOptions="Center"
                    TextColor="{Binding IsRecording, Converter={StaticResource BoolToObjectConverter}, ConverterParameter='Red,Default'}"/> -->
-            
-            <!-- Activity indicator for busy state -->
-            <ActivityIndicator IsRunning="{Binding IsBusy}" 
-                               Grid.Row="2"
-                               HorizontalOptions="Center"
-                               HeightRequest="30"
-                               WidthRequest="30"
-                               Margin="0,60,0,0" />
+
+
         </Grid>
 
         <controls:ActivityIndicatorView
-                            IsVisible="{Binding IsAnalyzingContext}"
-                            IsRunning="{Binding IsAnalyzingContext}"
-                            HorizontalOptions="Start"
-                            Title="{Binding AnalysisStatusTitle}"
-                            Detail="{Binding AnalysisStatusDetail}"
-                            MinimumWidthRequest="200"
-                            MinimumHeightRequest="100"
-                            ShimmerStartColor="#4a90e2"
-                            ShimmerEndColor="#9b59b6"/>
-        
+            IsVisible="{Binding IsAnalyzingContext}"
+            IsRunning="{Binding IsAnalyzingContext}"
+            HorizontalOptions="Start"
+            Title="{Binding AnalysisStatusTitle}"
+            Detail="{Binding AnalysisStatusDetail}"
+            MinimumWidthRequest="200"
+            MinimumHeightRequest="100"
+            ShimmerStartColor="#4a90e2"
+            ShimmerEndColor="#9b59b6"/>
+
         <!-- Review Phase -->
-        <ScrollView 
-            IsVisible="{Binding Phase, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pageModels:VoicePhase.Reviewing}}"> 
+        <ScrollView
+            IsVisible="{Binding Phase, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pageModels:VoicePhase.Reviewing}}">
             <VerticalStackLayout Spacing="{StaticResource LayoutSpacing}">
 
                 <!-- Projects Section -->
-                <VerticalStackLayout 
+                <VerticalStackLayout
                     IsVisible="{Binding Projects.Count, Converter={StaticResource IntToBoolConverter}}"
                     Spacing="{StaticResource LayoutSpacing}">
-                    <Label Text="Extracted Projects and Tasks" Style="{StaticResource Title1}" TextColor="{toolkit:AppThemeResource Tertiary}" />
+                    <Label Text="Extracted Projects and Tasks"
+                           Style="{StaticResource Title1}"
+                           TextColor="{toolkit:AppThemeResource Tertiary}"/>
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Projects}"
-                        Spacing="{StaticResource LayoutSpacing}">
+                                         Spacing="{StaticResource LayoutSpacing}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:Project">
                                 <VerticalStackLayout Spacing="{StaticResource LayoutSpacing}">
-                                    <Label Text="{Binding Name}" 
-                                        TextColor="{toolkit:AppThemeResource Quaternary}"
-                                        Style="{StaticResource Title2}" />
+                                    <Label Text="{Binding Name}"
+                                           TextColor="{toolkit:AppThemeResource Quaternary}"
+                                           Style="{StaticResource Title2}"/>
                                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Tasks}"
-                                        Spacing="{StaticResource LayoutSpacing}">
+                                                         Spacing="{StaticResource LayoutSpacing}">
                                         <BindableLayout.ItemTemplate>
                                             <DataTemplate x:DataType="models:ProjectTask">
-                                                <controls:TaskView 
+                                                <controls:TaskView
                                                     TaskCompletedCommand="{Binding TaskCompletedCommand, Source={RelativeSource AncestorType={x:Type pageModels:VoicePageModel}}, x:DataType=pageModels:VoicePageModel}"
                                                     AcceptRecommendationCommand="{Binding AcceptRecommendationCommand, Source={RelativeSource AncestorType={x:Type pageModels:VoicePageModel}}, x:DataType=pageModels:VoicePageModel}"
-                                                    RejectRecommendationCommand="{Binding RejectRecommendationCommand, Source={RelativeSource AncestorType={x:Type pageModels:VoicePageModel}}, x:DataType=pageModels:VoicePageModel}" />
+                                                    RejectRecommendationCommand="{Binding RejectRecommendationCommand, Source={RelativeSource AncestorType={x:Type pageModels:VoicePageModel}}, x:DataType=pageModels:VoicePageModel}"/>
                                             </DataTemplate>
                                         </BindableLayout.ItemTemplate>
                                     </VerticalStackLayout>
@@ -165,18 +176,18 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
-                </VerticalStackLayout>                
-                
-                
+                </VerticalStackLayout>
+
+
                 <!-- Action Buttons -->
                 <HorizontalStackLayout Spacing="{StaticResource LayoutSpacing}">
                     <Button Text="Re-record"
                             Command="{Binding ReRecordCommand}"
-                            HorizontalOptions="End" />
-                            
+                            HorizontalOptions="End"/>
+
                     <Button Text="Save"
                             Command="{Binding SaveCommand}"
-                            HorizontalOptions="Start" />
+                            HorizontalOptions="Start"/>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </ScrollView>

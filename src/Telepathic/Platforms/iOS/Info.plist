@@ -40,6 +40,9 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>The Telepathic app wants to use your microphone to record audio.</string>
 	
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app needs your permission to recognize speech for voice-to-text transcription.</string>
+	
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to your camera to capture photos for creating tasks.</string>
 	

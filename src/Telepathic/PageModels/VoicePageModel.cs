@@ -1,7 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Maui.Media;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Plugin.Maui.Audio;
@@ -27,17 +31,21 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
     private readonly ILogger<VoicePageModel> _logger;
     private readonly TaskAssistHandler _taskAssistHandler;
     private readonly IUserMemoryStore _memoryStore;
+    private readonly ISpeechToText _speechToText;
 
     IAudioSource? _audioSource = null;
 
     IAudioRecorder? _recorder;
     readonly ITranscriptionService _transcriber;
+    private CancellationTokenSource? _recordingCts;
 
     [ObservableProperty] bool isRecording;
     [ObservableProperty] bool isBusy;
     [ObservableProperty] VoicePhase phase = VoicePhase.Recording;
     [ObservableProperty] string recordButtonText = "🎤 Record";
     [ObservableProperty] string transcript = string.Empty;
+    [ObservableProperty] string liveTranscript = string.Empty;
+    [ObservableProperty] bool useSpeechToText = true; // Default to real-time STT
 
     // Status indicator properties
     [ObservableProperty] bool isAnalyzingContext;
@@ -65,7 +73,8 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
         TaskRepository taskRepository,
         ILogger<VoicePageModel> logger,
         TaskAssistHandler taskAssistHandler,
-        IUserMemoryStore memoryStore)
+        IUserMemoryStore memoryStore,
+        ISpeechToText speechToText)
     {
         // _audio = audio;
         _audioManager = audioManager;
@@ -77,6 +86,11 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
         _logger = logger;
         _taskAssistHandler = taskAssistHandler;
         _memoryStore = memoryStore;
+        _speechToText = speechToText;
+
+        // Subscribe to completion event once (like working sample)
+        _speechToText.RecognitionResultCompleted += OnRecognitionTextCompleted;
+        _speechToText.StateChanged += OnSpeechToTextStateChanged;
 
         _logger.LogInformation("Voice Modal Page Model initialized");
     }
@@ -95,6 +109,132 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
 
     [RelayCommand]
     private async Task ToggleRecordingAsync()
+    {
+        // Route to appropriate recording method based on mode
+        if (UseSpeechToText)
+        {
+            await ToggleSpeechToTextAsync();
+        }
+        else
+        {
+            await ToggleAudioRecordingAsync();
+        }
+    }
+
+    /// <summary>
+    /// Toggle Speech-to-Text recording with real-time transcription
+    /// </summary>
+    private async Task ToggleSpeechToTextAsync()
+    {
+        if (!IsRecording)
+        {
+            try
+            {
+                // Use ISpeechToText's built-in permission request (like working sample)
+                _logger.LogInformation("Requesting speech recognition permissions");
+                var isGranted = await _speechToText.RequestPermissions(CancellationToken.None);
+                if (!isGranted)
+                {
+                    _logger.LogWarning("Speech recognition permission not granted");
+                    await Shell.Current.DisplayAlert(
+                        "Permission Required",
+                        "Speech recognition requires microphone and speech permissions. Please enable them in System Settings > Privacy & Security.",
+                        "OK");
+                    return;
+                }
+
+                // Check network connectivity (required for online STT)
+                if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+                {
+                    _logger.LogWarning("No internet connection for STT");
+                    await Shell.Current.DisplayAlert(
+                        "Internet Required",
+                        "Speech recognition requires an internet connection. Would you like to try audio recording mode instead?",
+                        "OK");
+                    return;
+                }
+
+                _logger.LogInformation("Starting Speech-to-Text recording");
+                _stopwatch.Restart();
+                _recordingCts = new CancellationTokenSource();
+
+                // Configure audio device to prefer external microphones
+                _logger.LogInformation("Configuring audio device for external microphone");
+                var deviceInfo = AudioDeviceService.ConfigureForExternalMicrophone();
+
+                // Show toast with selected microphone
+                var toast = Toast.Make(deviceInfo, ToastDuration.Short);
+                await toast.Show();
+
+                // Log available input devices for debugging
+                var availableDevices = AudioDeviceService.GetAvailableInputDevices();
+                _logger.LogInformation("Available audio input devices: {Devices}", string.Join(", ", availableDevices));
+
+                // Subscribe to updated event (completed already subscribed in constructor)
+                _speechToText.RecognitionResultUpdated += OnRecognitionTextUpdated;
+
+                _logger.LogInformation("Starting STT listener with culture: {Culture}, Partial: {Partial}",
+                    CultureInfo.CurrentCulture.Name, true);
+
+                // Start listening with partial results
+                await _speechToText.StartListenAsync(
+                    new CommunityToolkit.Maui.Media.SpeechToTextOptions
+                    {
+                        Culture = CultureInfo.CurrentCulture,
+                        ShouldReportPartialResults = true
+                    },
+                    _recordingCts.Token);
+
+                _logger.LogInformation("STT listener started successfully");
+                IsRecording = true;
+                RecordButtonText = "⏹ Stop";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error starting STT recording");
+                _errorHandler.HandleError(ex);
+                await CleanupSpeechToText();
+            }
+        }
+        else
+        {
+            try
+            {
+                _logger.LogInformation("Stopping Speech-to-Text recording");
+                _stopwatch.Stop();
+
+                Phase = VoicePhase.Transcribing;
+
+                // Unsubscribe from updated event before stopping
+                _speechToText.RecognitionResultUpdated -= OnRecognitionTextUpdated;
+
+                // Stop listening (don't cancel token first - let it complete gracefully)
+                _logger.LogInformation("Calling StopListenAsync");
+                await _speechToText.StopListenAsync(CancellationToken.None);
+
+                IsRecording = false;
+                RecordButtonText = "🎤 Record";
+
+
+                _logger.LogInformation("STT recording stopped after {Duration}ms - waiting for completion event", _stopwatch.ElapsedMilliseconds);
+
+                // The RecognitionResultCompleted event will handle the rest
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error stopping STT recording");
+                _errorHandler.HandleError(ex);
+                IsRecording = false;
+                RecordButtonText = "🎤 Record";
+                await CleanupSpeechToText();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Toggle audio recording (legacy mode) - records audio then transcribes via API
+    /// </summary>
+    private async Task ToggleAudioRecordingAsync()
     {
         if (!IsRecording)
         {
@@ -127,11 +267,23 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
                     }
                 }
 
-                _logger.LogInformation("Starting voice recording");
+                _logger.LogInformation("Starting audio recording");
                 _stopwatch.Restart();
+
+                // Configure audio device to prefer external microphones
+                _logger.LogInformation("Configuring audio device for external microphone");
+                var deviceInfo = AudioDeviceService.ConfigureForExternalMicrophone();
+
+                // Show toast with selected microphone
+                var toast = Toast.Make(deviceInfo, ToastDuration.Short);
+                await toast.Show();
+
+                // Log available input devices for debugging
+                var availableDevices = AudioDeviceService.GetAvailableInputDevices();
+                _logger.LogInformation("Available audio input devices: {Devices}", string.Join(", ", availableDevices));
+
                 _recorder = _audioManager.CreateRecorder();
                 await _recorder.StartAsync();
-                // await _audio.StartRecordingAsync(CancellationToken.None);
                 IsRecording = true;
                 RecordButtonText = "⏹ Stop";
             }
@@ -172,6 +324,126 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
                 RecordButtonText = "🎤 Record";
             }
         }
+    }
+
+    /// <summary>
+    /// Event handler for real-time speech recognition updates
+    /// </summary>
+    private void OnRecognitionTextUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs args)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            var resultText = args.RecognitionResult ?? string.Empty;
+#if IOS
+            // iOS sends individual words, so append with space
+            if (!string.IsNullOrEmpty(LiveTranscript) && !string.IsNullOrEmpty(resultText))
+            {
+                LiveTranscript += " " + resultText;
+            }
+            else
+            {
+                LiveTranscript += resultText;
+            }
+#else
+            // Android sends cumulative text, so replace
+            LiveTranscript = resultText;
+#endif
+            _logger.LogInformation("STT partial result received: '{Text}' ({Length} chars)",
+                LiveTranscript.Length > 50 ? LiveTranscript.Substring(0, 50) + "..." : LiveTranscript,
+                LiveTranscript.Length);
+        });
+    }
+
+    /// <summary>
+    /// Event handler for speech recognition state changes
+    /// </summary>
+    private void OnSpeechToTextStateChanged(object? sender, SpeechToTextStateChangedEventArgs args)
+    {
+        _logger.LogInformation("STT state changed to: {State}", args.State);
+    }
+
+    /// <summary>
+    /// Event handler for completed speech recognition
+    /// </summary>
+    private void OnRecognitionTextCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs args)
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                _logger.LogInformation("STT completion event fired");
+                var result = args.RecognitionResult;
+
+                // Use LiveTranscript (contains full cumulative text from updates)
+                // On iOS, result.Text only contains the last word, not the full transcript
+                var finalText = LiveTranscript;
+
+                _logger.LogInformation("STT result - IsSuccessful: {IsSuccessful}, result.Text length: {Length}, LiveTranscript length: {LiveLength}, Exception: {Exception}",
+                    result?.IsSuccessful ?? false,
+                    result?.Text?.Length ?? 0,
+                    finalText?.Length ?? 0,
+                    result?.Exception?.Message ?? "None");
+
+                // Check if we have any text to work with
+                if (!string.IsNullOrWhiteSpace(finalText))
+                {
+                    Transcript = finalText;
+                    _logger.LogInformation("STT completed successfully: {Length} chars - '{Preview}'",
+                        Transcript.Length,
+                        Transcript.Length > 100 ? Transcript.Substring(0, 100) + "..." : Transcript);
+
+                    // Clear live transcript AFTER phase change so UI transitions smoothly
+                    LiveTranscript = string.Empty;
+
+                    // Show progress indicators during AI task extraction
+                    IsAnalyzingContext = true;
+                    AnalysisStatusTitle = "Analyzing Content";
+                    AnalysisStatusDetail = "Using AI to identify tasks and projects in your recording...";
+
+                    // Extract tasks from the transcript
+                    await ExtractTasksAsync();
+
+                    IsAnalyzingContext = false;
+                }
+                else
+                {
+                    var errorMsg = result?.Exception?.Message ?? "No text detected";
+                    _logger.LogWarning("STT completed but no text - returning to recording phase. Error: {Error}", errorMsg);
+                    Phase = VoicePhase.Recording;
+                    LiveTranscript = string.Empty; // Clear any partial text
+                }
+
+                await CleanupSpeechToText();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in STT completion handler");
+                _errorHandler.HandleError(ex);
+                await CleanupSpeechToText();
+                Phase = VoicePhase.Recording;
+            }
+        });
+    }
+
+    /// <summary>
+    /// Cleanup STT resources and event subscriptions
+    /// </summary>
+    private async Task CleanupSpeechToText()
+    {
+        try
+        {
+            // Only unsubscribe from updated event (completed is permanent in constructor)
+            _speechToText.RecognitionResultUpdated -= OnRecognitionTextUpdated;
+
+            _recordingCts?.Dispose();
+            _recordingCts = null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during STT cleanup");
+        }
+
+        await Task.CompletedTask;
     }
 
     private async Task TranscribeAsync()
@@ -231,8 +503,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
             // Extract projects and tasks from the transcript
             await ExtractTasksAsync();
 
-            // After successful transcription and extraction, move to review phase
-            Phase = VoicePhase.Reviewing;
+
         }
         catch (Exception ex)
         {
@@ -342,6 +613,8 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
                     await ReRecordAsync();
                     return;
                 }
+
+                Phase = VoicePhase.Reviewing;
             }
         }
         catch (Exception ex)
@@ -446,6 +719,7 @@ public partial class VoicePageModel : ObservableObject, IProjectTaskPageModel
         // Reset everything back to initial state
         Phase = VoicePhase.Recording;
         Transcript = string.Empty;
+        LiveTranscript = string.Empty; // Clear live transcript
         Projects.Clear();
 
         // Wait a moment to ensure UI updates

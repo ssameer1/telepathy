@@ -233,6 +233,7 @@
                 </Grid>
 
                 <VerticalStackLayout Spacing="15"
+                                     SafeAreaEdges="None"
                                      BindableLayout.ItemsSource="{Binding Tasks}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>

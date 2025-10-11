@@ -53,5 +53,8 @@
 
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs your permission to record audio.</string>
+	
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app needs your permission to recognize speech for voice-to-text transcription.</string>
 </dict>
 </plist>

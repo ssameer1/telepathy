@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Media;
 using Microsoft.Extensions.Logging;
 using Plugin.Maui.Audio;
 using Plugin.Maui.CalendarStore;
@@ -57,6 +58,7 @@ public static class MauiProgram
 		builder.Services.AddLogging(configure => configure.AddDebug());
 #endif
 		builder.Services.AddSingleton(CalendarStore.Default);
+		builder.Services.AddSingleton<ISpeechToText>(SpeechToText.Default);
 		builder.Services.AddSingleton<ProjectRepository>();
 		builder.Services.AddSingleton<TaskRepository>();
 		builder.Services.AddSingleton<CategoryRepository>();
