@@ -590,6 +590,54 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Ambient Light Sensor Section (Android Only) -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16"
+                    Opacity="{Binding IsLightSensorAvailable, Converter={StaticResource BoolToOpacityConverter}}">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="💡 Ambient Light (Android Only)"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               VerticalOptions="Center"/>
+                        <Label Text="(Unavailable)"
+                               IsVisible="{Binding IsLightSensorAvailable, Converter={StaticResource InvertedBoolConverter}}"
+                               TextColor="{toolkit:AppThemeResource Error}"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <Button Text="{Binding IsLightSensorMonitoring, Converter={StaticResource BoolToTextConverter}}"
+                            Command="{Binding ToggleLightSensorCommand}"
+                            Background="{Binding IsLightSensorMonitoring, Converter={StaticResource BoolToColorConverter}}"
+                            TextColor="{toolkit:AppThemeResource OnPrimary}"
+                            IsVisible="{Binding IsLightSensorAvailable}"/>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto, Auto"
+                          RowSpacing="8">
+                        <Label Text="Light Level:"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding LightLevel}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="Description:"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding LightDescription}"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
         </VerticalStackLayout>
     </ScrollView>
 

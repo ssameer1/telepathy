@@ -76,6 +76,20 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IAudioService, AudioService>();
 		builder.Services.AddSingleton<ITranscriptionService, FoundryTranscriptionService>();
 		builder.Services.AddSingleton<IChatClientService, ChatClientService>();
+		
+		// Platform-specific services
+#if ANDROID
+		builder.Services.AddSingleton<Services.ILightSensorService, Platforms.Android.LightSensorService>();
+#elif IOS
+		builder.Services.AddSingleton<Services.ILightSensorService, Platforms.iOS.LightSensorService>();
+#elif MACCATALYST
+		builder.Services.AddSingleton<Services.ILightSensorService, Platforms.MacCatalyst.LightSensorService>();
+#elif WINDOWS
+		builder.Services.AddSingleton<Services.ILightSensorService, Platforms.Windows.LightSensorService>();
+#else
+		builder.Services.AddSingleton<Services.ILightSensorService, Platforms.Android.LightSensorService>();
+#endif
+		
 		builder.Services.AddSingleton<LocationTools>();
 		builder.Services.AddSingleton<TaskAssistAnalyzer>();
 		builder.Services.AddSingleton<TaskAssistHandler>();

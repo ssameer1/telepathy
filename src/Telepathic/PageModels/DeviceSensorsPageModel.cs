@@ -5,12 +5,14 @@ using Microsoft.Maui.Devices;
 using Microsoft.Maui.Devices.Sensors;
 using Microsoft.Maui.Networking;
 using System.Collections.ObjectModel;
+using Telepathic.Services;
 
 namespace Telepathic.PageModels;
 
 public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
 {
     private readonly ILogger<DeviceSensorsPageModel> _logger;
+    private readonly ILightSensorService _lightSensorService;
     private bool _isMonitoringBattery;
     private bool _isMonitoringConnectivity;
     private bool _disposed;
@@ -179,9 +181,24 @@ public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
     private bool _isOrientationSensorMonitoring;
     #endregion
 
-    public DeviceSensorsPageModel(ILogger<DeviceSensorsPageModel> logger)
+    #region Ambient Light Sensor Properties (Android Only)
+    [ObservableProperty]
+    private string _lightLevel = "0.0";
+
+    [ObservableProperty]
+    private string _lightDescription = "Unknown";
+
+    [ObservableProperty]
+    private bool _isLightSensorAvailable;
+
+    [ObservableProperty]
+    private bool _isLightSensorMonitoring;
+    #endregion
+
+    public DeviceSensorsPageModel(ILogger<DeviceSensorsPageModel> logger, ILightSensorService lightSensorService)
     {
         _logger = logger;
+        _lightSensorService = lightSensorService;
     }
 
     [RelayCommand]
@@ -238,9 +255,10 @@ public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
             IsCompassAvailable = Compass.Default.IsSupported;
             IsBarometerAvailable = Barometer.Default.IsSupported;
             IsOrientationSensorAvailable = OrientationSensor.Default.IsSupported;
+            IsLightSensorAvailable = _lightSensorService.IsSupported;
 
-            _logger.LogInformation("Sensor availability checked - Accelerometer: {Accel}, Gyroscope: {Gyro}, Magnetometer: {Mag}, Compass: {Comp}, Barometer: {Baro}, Orientation: {Orient}",
-                IsAccelerometerAvailable, IsGyroscopeAvailable, IsMagnetometerAvailable, IsCompassAvailable, IsBarometerAvailable, IsOrientationSensorAvailable);
+            _logger.LogInformation("Sensor availability checked - Accelerometer: {Accel}, Gyroscope: {Gyro}, Magnetometer: {Mag}, Compass: {Comp}, Barometer: {Baro}, Orientation: {Orient}, Light: {Light}",
+                IsAccelerometerAvailable, IsGyroscopeAvailable, IsMagnetometerAvailable, IsCompassAvailable, IsBarometerAvailable, IsOrientationSensorAvailable, IsLightSensorAvailable);
         }
         catch (Exception ex)
         {
@@ -793,6 +811,81 @@ public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
     }
     #endregion
 
+    #region Ambient Light Sensor (Android Only)
+    [RelayCommand]
+    private async Task ToggleLightSensor()
+    {
+        if (!IsLightSensorAvailable)
+        {
+            await Shell.Current.DisplayAlertAsync("Unavailable", "Ambient light sensor is not available on this device (Android only).", "OK");
+            return;
+        }
+
+        if (IsLightSensorMonitoring)
+        {
+            StopLightSensor();
+        }
+        else
+        {
+            StartLightSensor();
+        }
+    }
+
+    private void StartLightSensor()
+    {
+        try
+        {
+            _lightSensorService.StartMonitoring(OnLuxChanged);
+            IsLightSensorMonitoring = true;
+            _logger.LogInformation("Ambient light sensor started");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error starting ambient light sensor");
+        }
+    }
+
+    private void StopLightSensor()
+    {
+        try
+        {
+            _lightSensorService.StopMonitoring();
+            IsLightSensorMonitoring = false;
+            _logger.LogInformation("Ambient light sensor stopped");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error stopping ambient light sensor");
+        }
+    }
+
+    private void OnLuxChanged(float lux)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            LightLevel = $"{lux:F1} lux";
+            LightDescription = GetLightDescription(lux);
+        });
+    }
+
+    private string GetLightDescription(float lux)
+    {
+        return lux switch
+        {
+            < 1 => "Complete darkness",
+            < 10 => "Very dark (moonlight)",
+            < 50 => "Dim indoor lighting",
+            < 200 => "Normal indoor lighting",
+            < 500 => "Bright indoor lighting",
+            < 1000 => "Very bright indoor",
+            < 10000 => "Overcast daylight",
+            < 25000 => "Partial sunlight",
+            < 50000 => "Full daylight",
+            _ => "Intense direct sunlight"
+        };
+    }
+    #endregion
+
     public void Dispose()
     {
         if (_disposed)
@@ -806,6 +899,7 @@ public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
         StopCompass();
         StopBarometer();
         StopOrientationSensor();
+        StopLightSensor();
 
         _disposed = true;
         _logger.LogInformation("DeviceSensorsPageModel disposed");
