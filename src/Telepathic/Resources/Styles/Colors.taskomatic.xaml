@@ -45,6 +45,10 @@
                            Light="#F5F5F5"
                            Dark="#F5F5F5"/>
 
+    <toolkit:AppThemeColor x:Key="OnTertiary"
+                           Light="#F5F5F5"
+                           Dark="#F5F5F5"/>
+
     <toolkit:AppThemeColor x:Key="Surface0"
                            Light="#FFFFFF"
                            Dark="#1E1E1E"/>

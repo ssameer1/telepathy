@@ -1,0 +1,611 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pageModels="clr-namespace:Telepathic.PageModels"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="Telepathic.Pages.DeviceSensorsPage"
+             x:DataType="pageModels:DeviceSensorsPageModel"
+             x:Name="DeviceSensorsPageRef"
+             Title="Device Sensors">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference DeviceSensorsPageRef}, x:DataType=ContentPage}"
+            EventName="NavigatedTo"
+            Command="{Binding LoadDataCommand}"/>
+    </ContentPage.Behaviors>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24"
+                             Spacing="24">
+
+            <Label Text="📱 Device Sensors"
+                   FontAttributes="Bold"
+                   FontSize="28"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,12"/>
+
+            <!-- Device Information Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="📱 Device Information"
+                           FontAttributes="Bold"
+                           FontSize="20"/>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto"
+                          RowSpacing="8">
+                        <Label Text="Model:"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding DeviceModel}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Manufacturer:"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding Manufacturer}"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Device Name:"
+                               Grid.Row="2"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding DeviceName}"
+                               Grid.Row="2"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Platform:"
+                               Grid.Row="3"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding Platform}"
+                               Grid.Row="3"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="OS Version:"
+                               Grid.Row="4"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding OsVersion}"
+                               Grid.Row="4"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Device Idiom:"
+                               Grid.Row="5"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding DeviceIdiom}"
+                               Grid.Row="5"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Device Type:"
+                               Grid.Row="6"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding DeviceType}"
+                               Grid.Row="6"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Display Information Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🖥️ Display Information"
+                           FontAttributes="Bold"
+                           FontSize="20"/>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
+                          RowSpacing="8">
+                        <Label Text="Screen Width:"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding ScreenWidth}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Screen Height:"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding ScreenHeight}"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Density:"
+                               Grid.Row="2"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding Density}"
+                               Grid.Row="2"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Orientation:"
+                               Grid.Row="3"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding Orientation}"
+                               Grid.Row="3"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Rotation:"
+                               Grid.Row="4"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding Rotation}"
+                               Grid.Row="4"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Refresh Rate:"
+                               Grid.Row="5"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding RefreshRate}"
+                               Grid.Row="5"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Battery Status Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="🔋 Battery Status"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               VerticalOptions="Center"/>
+                        <Button Text="{Binding IsBatteryMonitoring, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Stop|Start'}"
+                                Command="{Binding ToggleBatteryMonitoringCommand}"
+                                BackgroundColor="{Binding IsBatteryMonitoring, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Error|Primary'}"
+                                TextColor="{toolkit:AppThemeResource OnPrimary}"
+                                Padding="12,6"
+                                FontSize="12"/>
+                    </HorizontalStackLayout>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto, Auto, Auto, Auto"
+                          RowSpacing="8">
+                        <Label Text="Battery Level:"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding BatteryLevel}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="State:"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding BatteryState}"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Power Source:"
+                               Grid.Row="2"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding PowerSource}"
+                               Grid.Row="2"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Energy Saver:"
+                               Grid.Row="3"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding EnergySaverStatus}"
+                               Grid.Row="3"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Connectivity Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="🌐 Connectivity"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               VerticalOptions="Center"/>
+                        <Button Text="{Binding IsConnectivityMonitoring, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Stop|Start'}"
+                                Command="{Binding ToggleConnectivityMonitoringCommand}"
+                                BackgroundColor="{Binding IsConnectivityMonitoring, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Error|Primary'}"
+                                TextColor="{toolkit:AppThemeResource OnPrimary}"
+                                Padding="12,6"
+                                FontSize="12"/>
+                    </HorizontalStackLayout>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto, Auto"
+                          RowSpacing="8">
+                        <Label Text="Network Access:"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding NetworkAccess}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+
+                        <Label Text="Connection Type:"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding ConnectionProfiles}"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               FontAttributes="Bold"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Accelerometer Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16"
+                    Opacity="{Binding IsAccelerometerAvailable, Converter={StaticResource BoolToOpacityConverter}}">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="📐 Accelerometer"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               VerticalOptions="Center"/>
+                        <Label Text="(Unavailable)"
+                               IsVisible="{Binding IsAccelerometerAvailable, Converter={StaticResource InvertedBoolConverter}}"
+                               TextColor="{toolkit:AppThemeResource Error}"
+                               VerticalOptions="Center"/>
+                        <Button Text="{Binding IsAccelerometerMonitoring, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Stop|Start'}"
+                                Command="{Binding ToggleAccelerometerCommand}"
+                                IsVisible="{Binding IsAccelerometerAvailable}"
+                                BackgroundColor="{Binding IsAccelerometerMonitoring, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Error|Primary'}"
+                                TextColor="{toolkit:AppThemeResource OnPrimary}"
+                                Padding="12,6"
+                                FontSize="12"/>
+                    </HorizontalStackLayout>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto, Auto, Auto"
+                          RowSpacing="8">
+                        <Label Text="X-Axis:"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding AccelerometerX}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="Y-Axis:"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding AccelerometerY}"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="Z-Axis:"
+                               Grid.Row="2"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding AccelerometerZ}"
+                               Grid.Row="2"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Gyroscope Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16"
+                    Opacity="{Binding IsGyroscopeAvailable, Converter={StaticResource BoolToOpacityConverter}}">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="🔄 Gyroscope"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               VerticalOptions="Center"/>
+                        <Label Text="(Unavailable)"
+                               IsVisible="{Binding IsGyroscopeAvailable, Converter={StaticResource InvertedBoolConverter}}"
+                               TextColor="{toolkit:AppThemeResource Error}"
+                               VerticalOptions="Center"/>
+                        <Button Text="{Binding IsGyroscopeMonitoring, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Stop|Start'}"
+                                Command="{Binding ToggleGyroscopeCommand}"
+                                IsVisible="{Binding IsGyroscopeAvailable}"
+                                BackgroundColor="{Binding IsGyroscopeMonitoring, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Error|Primary'}"
+                                TextColor="{toolkit:AppThemeResource OnPrimary}"
+                                Padding="12,6"
+                                FontSize="12"/>
+                    </HorizontalStackLayout>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto, Auto, Auto"
+                          RowSpacing="8">
+                        <Label Text="X-Axis (rad/s):"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding GyroscopeX}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="Y-Axis (rad/s):"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding GyroscopeY}"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="Z-Axis (rad/s):"
+                               Grid.Row="2"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding GyroscopeZ}"
+                               Grid.Row="2"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Magnetometer Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16"
+                    Opacity="{Binding IsMagnetometerAvailable, Converter={StaticResource BoolToOpacityConverter}}">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="🧲 Magnetometer"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               VerticalOptions="Center"/>
+                        <Label Text="(Unavailable)"
+                               IsVisible="{Binding IsMagnetometerAvailable, Converter={StaticResource InvertedBoolConverter}}"
+                               TextColor="{toolkit:AppThemeResource Error}"
+                               VerticalOptions="Center"/>
+                        <Button Text="{Binding IsMagnetometerMonitoring, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Stop|Start'}"
+                                Command="{Binding ToggleMagnetometerCommand}"
+                                IsVisible="{Binding IsMagnetometerAvailable}"
+                                BackgroundColor="{Binding IsMagnetometerMonitoring, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Error|Primary'}"
+                                TextColor="{toolkit:AppThemeResource OnPrimary}"
+                                Padding="12,6"
+                                FontSize="12"/>
+                    </HorizontalStackLayout>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto, Auto, Auto"
+                          RowSpacing="8">
+                        <Label Text="X-Axis (µT):"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding MagnetometerX}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="Y-Axis (µT):"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding MagnetometerY}"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="Z-Axis (µT):"
+                               Grid.Row="2"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding MagnetometerZ}"
+                               Grid.Row="2"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Compass Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16"
+                    Opacity="{Binding IsCompassAvailable, Converter={StaticResource BoolToOpacityConverter}}">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="🧭 Compass"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               VerticalOptions="Center"/>
+                        <Label Text="(Unavailable)"
+                               IsVisible="{Binding IsCompassAvailable, Converter={StaticResource InvertedBoolConverter}}"
+                               TextColor="{toolkit:AppThemeResource Error}"
+                               VerticalOptions="Center"/>
+                        <Button Text="{Binding IsCompassMonitoring, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Stop|Start'}"
+                                Command="{Binding ToggleCompassCommand}"
+                                IsVisible="{Binding IsCompassAvailable}"
+                                BackgroundColor="{Binding IsCompassMonitoring, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Error|Primary'}"
+                                TextColor="{toolkit:AppThemeResource OnPrimary}"
+                                Padding="12,6"
+                                FontSize="12"/>
+                    </HorizontalStackLayout>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto"
+                          RowSpacing="8">
+                        <Label Text="Heading (Magnetic North):"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding CompassHeading}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Barometer Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16"
+                    Opacity="{Binding IsBarometerAvailable, Converter={StaticResource BoolToOpacityConverter}}">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="🌡️ Barometer"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               VerticalOptions="Center"/>
+                        <Label Text="(Unavailable)"
+                               IsVisible="{Binding IsBarometerAvailable, Converter={StaticResource InvertedBoolConverter}}"
+                               TextColor="{toolkit:AppThemeResource Error}"
+                               VerticalOptions="Center"/>
+                        <Button Text="{Binding IsBarometerMonitoring, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Stop|Start'}"
+                                Command="{Binding ToggleBarometerCommand}"
+                                IsVisible="{Binding IsBarometerAvailable}"
+                                BackgroundColor="{Binding IsBarometerMonitoring, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Error|Primary'}"
+                                TextColor="{toolkit:AppThemeResource OnPrimary}"
+                                Padding="12,6"
+                                FontSize="12"/>
+                    </HorizontalStackLayout>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto"
+                          RowSpacing="8">
+                        <Label Text="Atmospheric Pressure:"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding Pressure}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Orientation Sensor Section -->
+            <Border StrokeThickness="1"
+                    Stroke="{toolkit:AppThemeResource Surface1}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{toolkit:AppThemeResource Surface0}"
+                    Padding="16"
+                    Opacity="{Binding IsOrientationSensorAvailable, Converter={StaticResource BoolToOpacityConverter}}">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="📱 Orientation Sensor"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               VerticalOptions="Center"/>
+                        <Label Text="(Unavailable)"
+                               IsVisible="{Binding IsOrientationSensorAvailable, Converter={StaticResource InvertedBoolConverter}}"
+                               TextColor="{toolkit:AppThemeResource Error}"
+                               VerticalOptions="Center"/>
+                        <Button Text="{Binding IsOrientationSensorMonitoring, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Stop|Start'}"
+                                Command="{Binding ToggleOrientationSensorCommand}"
+                                IsVisible="{Binding IsOrientationSensorAvailable}"
+                                BackgroundColor="{Binding IsOrientationSensorMonitoring, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Error|Primary'}"
+                                TextColor="{toolkit:AppThemeResource OnPrimary}"
+                                Padding="12,6"
+                                FontSize="12"/>
+                    </HorizontalStackLayout>
+
+                    <Grid ColumnDefinitions="*, Auto"
+                          RowDefinitions="Auto, Auto, Auto, Auto"
+                          RowSpacing="8">
+                        <Label Text="W (Quaternion):"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding OrientationW}"
+                               Grid.Row="0"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="X (Quaternion):"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding OrientationX}"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="Y (Quaternion):"
+                               Grid.Row="2"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding OrientationY}"
+                               Grid.Row="2"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+
+                        <Label Text="Z (Quaternion):"
+                               Grid.Row="3"
+                               Grid.Column="0"/>
+                        <Label Text="{Binding OrientationZ}"
+                               Grid.Row="3"
+                               Grid.Column="1"
+                               FontAttributes="Bold"
+                               FontFamily="Courier"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+            <toolkit:BoolToObjectConverter x:Key="BoolToTextConverter"
+                                           TrueObject="Stop"
+                                           FalseObject="Start"/>
+            <toolkit:BoolToObjectConverter x:Key="BoolToColorConverter"
+                                           TrueObject="{toolkit:AppThemeResource Error}"
+                                           FalseObject="{toolkit:AppThemeResource Primary}"/>
+            <toolkit:BoolToObjectConverter x:Key="BoolToOpacityConverter"
+                                           TrueObject="1.0"
+                                           FalseObject="0.5"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+</ContentPage>

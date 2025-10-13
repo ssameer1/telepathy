@@ -279,4 +279,10 @@ public partial class UserProfilePageModel : ObservableObject
     {
         await Shell.Current.GoToAsync("mydata");
     }
+
+    [RelayCommand]
+    private async Task NavigateToSensors()
+    {
+        await Shell.Current.GoToAsync("sensors");
+    }
 }

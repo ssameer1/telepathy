@@ -72,6 +72,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<MemoryDebugPageModel>();
 		builder.Services.AddSingleton<UserProfilePageModel>();
 		builder.Services.AddSingleton<MyDataPageModel>();
+		builder.Services.AddSingleton<DeviceSensorsPageModel>();
 		builder.Services.AddSingleton<IAudioService, AudioService>();
 		builder.Services.AddSingleton<ITranscriptionService, FoundryTranscriptionService>();
 		builder.Services.AddSingleton<IChatClientService, ChatClientService>();
@@ -84,6 +85,7 @@ public static class MauiProgram
 		builder.Services.AddTransientWithShellRoute<PhotoPage, PhotoPageModel>("photo");
 		builder.Services.AddTransientWithShellRoute<MemoryDebugPage, MemoryDebugPageModel>("memory-debug");
 		builder.Services.AddTransientWithShellRoute<MyDataPage, MyDataPageModel>("mydata");
+		builder.Services.AddTransientWithShellRoute<DeviceSensorsPage, DeviceSensorsPageModel>("sensors");
 
 		return builder.Build();
 	}

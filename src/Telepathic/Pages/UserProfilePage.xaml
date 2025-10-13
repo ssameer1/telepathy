@@ -25,6 +25,22 @@
                    HorizontalOptions="Center"
                    Margin="0,0,0,12"/>
 
+            <!-- Navigation Buttons -->
+            <Grid ColumnDefinitions="*, *"
+                  ColumnSpacing="12"
+                  Margin="0,0,0,12">
+                <Button Grid.Column="0"
+                        Text="📊 My Data"
+                        Command="{Binding NavigateToMyDataCommand}"
+                        BackgroundColor="{toolkit:AppThemeResource Secondary}"
+                        TextColor="{toolkit:AppThemeResource OnSecondary}"/>
+                <Button Grid.Column="1"
+                        Text="📱 Sensors"
+                        Command="{Binding NavigateToSensorsCommand}"
+                        BackgroundColor="{toolkit:AppThemeResource Tertiary}"
+                        TextColor="{toolkit:AppThemeResource OnTertiary}"/>
+            </Grid>
+
             <!-- Telepathy Toggle -->
             <sf:SfTextInputLayout IsHintAlwaysFloated="True"
                                   Hint="Enable Telepathy"
@@ -124,13 +140,6 @@
                         HeightRequest="100"
                         Placeholder="Give me details to personalize your app experience."/>
             </sf:SfTextInputLayout>
-
-            <!-- My Data Button -->
-            <Button Text="📊 View My Data"
-                    Command="{Binding NavigateToMyDataCommand}"
-                    BackgroundColor="{toolkit:AppThemeResource Secondary}"
-                    TextColor="{toolkit:AppThemeResource OnSecondary}"
-                    Margin="0,24,0,0"/>
 
         </VerticalStackLayout>
     </ScrollView>
