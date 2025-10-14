@@ -48,5 +48,11 @@
 	
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to your photo library to select photos for creating tasks.</string>
+	
+	<key>NSHealthShareUsageDescription</key>
+	<string>This app needs access to your heart rate and step count to display health information on the sensors page.</string>
+	
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>This app needs access to update your health data.</string>
 </dict>
 </plist>

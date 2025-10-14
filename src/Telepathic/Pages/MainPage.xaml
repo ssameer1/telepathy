@@ -53,17 +53,11 @@
     <Grid SafeAreaEdges="None">
         <ScrollView x:Name="ScrollView"
                     SafeAreaEdges="None">
-            <!-- <VisualElement.Behaviors>
-                        <aloha:ScrollViewScrollBehavior x:Name="ScrollBehavior"/>
-                    </VisualElement.Behaviors> -->
             <VerticalStackLayout
                 x:Name="ScrollContent"
                 Spacing="{StaticResource LayoutSpacing}"
                 Padding="{StaticResource LayoutPadding}">
 
-                <!-- <Button Text="Force" Command="{Binding ForcePriorityTaskRefreshCommand}"/> -->
-
-                <!-- Activity Indicator for telepathic analysis -->
                 <controls:ActivityIndicatorView
                     IsVisible="{Binding IsAnalyzingContext}"
                     IsRunning="{Binding IsAnalyzingContext}"
@@ -233,7 +227,6 @@
                 </Grid>
 
                 <VerticalStackLayout Spacing="15"
-                                     SafeAreaEdges="None"
                                      BindableLayout.ItemsSource="{Binding Tasks}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>

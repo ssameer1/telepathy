@@ -13,6 +13,7 @@ public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
 {
     private readonly ILogger<DeviceSensorsPageModel> _logger;
     private readonly ILightSensorService _lightSensorService;
+    private readonly IHealthService _healthService;
     private bool _isMonitoringBattery;
     private bool _isMonitoringConnectivity;
     private bool _disposed;
@@ -195,10 +196,31 @@ public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
     private bool _isLightSensorMonitoring;
     #endregion
 
-    public DeviceSensorsPageModel(ILogger<DeviceSensorsPageModel> logger, ILightSensorService lightSensorService)
+    #region Health Data Properties (iOS Only)
+    [ObservableProperty]
+    private string _heartRate = "-- BPM";
+
+    [ObservableProperty]
+    private string _heartRateStatus = "Unknown";
+
+    [ObservableProperty]
+    private string _stepCount = "0 steps";
+
+    [ObservableProperty]
+    private bool _isHealthAvailable;
+
+    [ObservableProperty]
+    private bool _isHealthAuthorized;
+
+    [ObservableProperty]
+    private bool _isHeartRateMonitoring;
+    #endregion
+
+    public DeviceSensorsPageModel(ILogger<DeviceSensorsPageModel> logger, ILightSensorService lightSensorService, IHealthService healthService)
     {
         _logger = logger;
         _lightSensorService = lightSensorService;
+        _healthService = healthService;
     }
 
     [RelayCommand]
@@ -256,9 +278,11 @@ public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
             IsBarometerAvailable = Barometer.Default.IsSupported;
             IsOrientationSensorAvailable = OrientationSensor.Default.IsSupported;
             IsLightSensorAvailable = _lightSensorService.IsSupported;
+            IsHealthAvailable = _healthService.IsSupported;
+            IsHealthAuthorized = _healthService.IsAuthorized;
 
-            _logger.LogInformation("Sensor availability checked - Accelerometer: {Accel}, Gyroscope: {Gyro}, Magnetometer: {Mag}, Compass: {Comp}, Barometer: {Baro}, Orientation: {Orient}, Light: {Light}",
-                IsAccelerometerAvailable, IsGyroscopeAvailable, IsMagnetometerAvailable, IsCompassAvailable, IsBarometerAvailable, IsOrientationSensorAvailable, IsLightSensorAvailable);
+            _logger.LogInformation("Sensor availability checked - Accelerometer: {Accel}, Gyroscope: {Gyro}, Magnetometer: {Mag}, Compass: {Comp}, Barometer: {Baro}, Orientation: {Orient}, Light: {Light}, Health: {Health}",
+                IsAccelerometerAvailable, IsGyroscopeAvailable, IsMagnetometerAvailable, IsCompassAvailable, IsBarometerAvailable, IsOrientationSensorAvailable, IsLightSensorAvailable, IsHealthAvailable);
         }
         catch (Exception ex)
         {
@@ -886,6 +910,161 @@ public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
     }
     #endregion
 
+    #region Health Data (iOS Only)
+    [RelayCommand]
+    private async Task RequestHealthPermission()
+    {
+        if (!IsHealthAvailable)
+        {
+            await Shell.Current.DisplayAlertAsync("Unavailable", "Health services are not available on this device (iOS only).", "OK");
+            return;
+        }
+
+        try
+        {
+            var authorized = await _healthService.RequestAuthorizationAsync();
+            IsHealthAuthorized = authorized;
+
+            if (authorized)
+            {
+                await Shell.Current.DisplayAlertAsync("Success", "Health data access granted!", "OK");
+                await RefreshHealthData();
+            }
+            else
+            {
+                await Shell.Current.DisplayAlertAsync("Permission Denied", "Please grant health data access in Settings to use this feature.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error requesting health permission");
+            await Shell.Current.DisplayAlertAsync("Error", "Failed to request health permission.", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task RefreshHealthData()
+    {
+        if (!IsHealthAvailable || !IsHealthAuthorized)
+            return;
+
+        try
+        {
+            // Get step count
+            var steps = await _healthService.GetStepCountAsync();
+            if (steps.HasValue)
+            {
+                StepCount = $"{steps.Value:N0} steps";
+            }
+            else
+            {
+                StepCount = "No data";
+            }
+
+            // Get heart rate (if not already monitoring)
+            if (!IsHeartRateMonitoring)
+            {
+                var bpm = await _healthService.GetHeartRateAsync();
+                if (bpm.HasValue)
+                {
+                    UpdateHeartRateDisplay(bpm.Value);
+                }
+                else
+                {
+                    HeartRate = "No data";
+                    HeartRateStatus = "Unknown";
+                }
+            }
+
+            _logger.LogInformation("Health data refreshed - Steps: {Steps}, HR: {HR}", StepCount, HeartRate);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error refreshing health data");
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleHeartRateMonitoring()
+    {
+        if (!IsHealthAvailable)
+        {
+            await Shell.Current.DisplayAlertAsync("Unavailable", "Health services are not available on this device (iOS only).", "OK");
+            return;
+        }
+
+        if (!IsHealthAuthorized)
+        {
+            await Shell.Current.DisplayAlertAsync("Permission Required", "Please grant health data access first.", "OK");
+            return;
+        }
+
+        if (IsHeartRateMonitoring)
+        {
+            StopHeartRateMonitoring();
+        }
+        else
+        {
+            StartHeartRateMonitoring();
+        }
+    }
+
+    private void StartHeartRateMonitoring()
+    {
+        try
+        {
+            _healthService.StartHeartRateMonitoring(OnHeartRateChanged);
+            IsHeartRateMonitoring = true;
+            _logger.LogInformation("Heart rate monitoring started");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error starting heart rate monitoring");
+        }
+    }
+
+    private void StopHeartRateMonitoring()
+    {
+        try
+        {
+            _healthService.StopHeartRateMonitoring();
+            IsHeartRateMonitoring = false;
+            _logger.LogInformation("Heart rate monitoring stopped");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error stopping heart rate monitoring");
+        }
+    }
+
+    private void OnHeartRateChanged(double bpm)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            UpdateHeartRateDisplay(bpm);
+        });
+    }
+
+    private void UpdateHeartRateDisplay(double bpm)
+    {
+        HeartRate = $"{bpm:F0} BPM";
+        HeartRateStatus = GetHeartRateStatus(bpm);
+    }
+
+    private string GetHeartRateStatus(double bpm)
+    {
+        return bpm switch
+        {
+            < 40 => "Very low",
+            < 60 => "Low / Athletic",
+            <= 100 => "Normal resting",
+            <= 140 => "Elevated",
+            <= 180 => "High (Exercise range)",
+            _ => "Very high"
+        };
+    }
+    #endregion
+
     public void Dispose()
     {
         if (_disposed)
@@ -900,6 +1079,7 @@ public partial class DeviceSensorsPageModel : ObservableObject, IDisposable
         StopBarometer();
         StopOrientationSensor();
         StopLightSensor();
+        StopHeartRateMonitoring();
 
         _disposed = true;
         _logger.LogInformation("DeviceSensorsPageModel disposed");
