@@ -1,5 +1,5 @@
 # Telepathy 🚀✨
-
+https://devblogs.microsoft.com/dotnet/using-ai-foundry-with-dotnet-maui/
 Welcome, space adventurer! Telepathy is your futuristic to‑do companion that goes beyond simple lists—leveraging AI, voice, photos, and context to become your personal **task-o-matic** navigator.
 
 [![AI infused mobile and desktop apps with .NET MAUI YouTube video](images/youtube_poster.png)](https://youtu.be/tFOFU7LDQlA?si=F1O4QajdvlZEr1UE)
